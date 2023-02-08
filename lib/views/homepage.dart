@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hive/hive.dart';
 
 import '../utilites/newpge.dart';
+import '../utilites/notesModel.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -13,7 +14,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late final Box box;
-  List content = [
+  List<NoteModel> content = [
     // "hello world 123",
     // "welcome \n to \nflutter ",
     // "this \n is \n a \n dynamic\n grid \n view"
@@ -28,17 +29,20 @@ class _MyHomePageState extends State<MyHomePage> {
     //   box.deleteAt(i);
     // }
     // box.deleteAt(0);
+    // var mylist = box.get("notes");
+    // print(mylist.length);
+    // box.put("notes", [NoteModel("title", "note")]);
     box.isEmpty ? print("not") : _getInfo();
   }
 
-  void updatetext(index, text) {
-    // print(context);
-    setState(() {
-      content[index] = text;
-    });
+  // void updatetext(index, text) {
+  //   // print(context);
+  //   setState(() {
+  //     content[index] = text;
+  //   });
 
-    box.add(content);
-  }
+  //   box.add(content);
+  // }
 
   @override
   void dispose() {
@@ -78,7 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        print('nah');
         return Future.value(false);
       },
       child: Scaffold(
@@ -93,24 +96,35 @@ class _MyHomePageState extends State<MyHomePage> {
             int index = content.length;
             print(index);
             setState(() {
-              content.add("");
+              var newNote = NoteModel("", "");
+              content.add(newNote);
             });
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => NewPage(
                           content[index],
-                          onSonChanged: (String data) {
+                          onTitleChanged: (String data) {
+                            print(content[index].note);
                             setState(() {
-                              content[index] = data;
+                              // var the_note = content[index];
+                              content[index].title_val = data;
                             });
-                            box.put('notes', content);
+                          },
+                          onContentChanged: (String text) {
+                            setState(() {
+                              // var the_note = content[index];
+                              content[index].note_val = text;
+                            });
                           },
                           // index: index,
                         ))).then((value) {
               if (value == true) {
+                box.put('notes', content);
                 setState(() {
-                  content.removeLast();
+                  // box. = content;
+                  // box.put(content);
+                  // content.removeLast();
                 });
               }
               print(content.contains(""));
@@ -179,29 +193,45 @@ class _MyHomePageState extends State<MyHomePage> {
                               MaterialPageRoute(
                                   builder: (context) => NewPage(
                                         content[index],
-                                        onSonChanged: (String data) {
+                                        onTitleChanged: (String data) {
+                                          print(data);
                                           setState(() {
-                                            content[index] = data;
+                                            var the_note = content[index];
+                                            content[index].title = data;
+                                          });
+                                        },
+                                        onContentChanged: (String text) {
+                                          setState(() {
+                                            var the_note = content[index];
+                                            content[index].note = text;
                                           });
                                         },
                                         // index: index,
-                                      ))).then((value) => print("back"));
+                                      ))).then((value) => {
+                                box.put('notes', content),
+                                setState(() {
+                                  box.put('notes', content);
+                                  // content.removeLast();
+                                })
+                              });
                         },
                         child: Container(
                           padding: EdgeInsets.all(10),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                  color: content[index].trim().isEmpty
-                                      ? Colors.transparent
-                                      : Colors.grey,
+                                  color:
+                                      // content[index].trim().isEmpty
+                                      //     ? Colors.transparent
+                                      //     :
+                                      Colors.grey,
                                   width: 1.5)),
                           child: Hero(
                               tag: 'dash',
                               child: Material(
                                 color: Colors.black,
                                 child: Text(
-                                  "${content[index]}",
+                                  "${content[index].title}",
                                   style: TextStyle(
                                     backgroundColor: Colors.black,
                                     color: Colors.white,

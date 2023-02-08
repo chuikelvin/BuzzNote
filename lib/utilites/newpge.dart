@@ -2,34 +2,39 @@
 
 import 'package:flutter/material.dart';
 
-typedef void IntCallback(String id);
+import 'notesModel.dart';
+
+typedef void CallBack(String text);
 
 class NewPage extends StatefulWidget {
-  late var content;
+  late NoteModel content;
 
-  final IntCallback onSonChanged;
+  final CallBack onTitleChanged;
+  final CallBack onContentChanged;
 
-  // Son({ @required this.onSonChanged });
+  // Son({ @required this.onChildChanged });
 
   // var items;
 
   // ignore: empty_constructor_bodies
-  NewPage(var content, {super.key, required this.onSonChanged}) {
-    this.content = content;
-    // this.index = index;
-  }
+  NewPage(this.content,
+      {super.key,
+      required this.onTitleChanged,
+      required this.onContentChanged});
 
   @override
   State<NewPage> createState() => _NewPageState();
 }
 
 class _NewPageState extends State<NewPage> {
-  TextEditingController _controller = new TextEditingController();
+  TextEditingController _title_controller = new TextEditingController();
+  TextEditingController _note_controller = new TextEditingController();
   @override
   void initState() {
     super.initState();
 
-    _controller.text = widget.content.toString();
+    _title_controller.text = widget.content.title;
+    _note_controller.text = widget.content.note;
   }
 
   // @override
@@ -43,7 +48,7 @@ class _NewPageState extends State<NewPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        if (_controller.text.trim().isEmpty) {
+        if (_note_controller.text.trim().isEmpty) {
           Navigator.pop(context, true);
           // return "empty";
         }
@@ -83,7 +88,7 @@ class _NewPageState extends State<NewPage> {
                       //     border: Border.all(color: Colors.grey, width: 1.5)),
                       child: TextField(
                         onChanged: (value) {
-                          widget.onSonChanged(value);
+                          widget.onTitleChanged(value);
                         },
                         style: TextStyle(
                           backgroundColor: Colors.black,
@@ -92,7 +97,7 @@ class _NewPageState extends State<NewPage> {
                         ),
                         // maxLines: null,
                         // keyboardType: TextInputType.multiline,
-                        // controller: _controller,
+                        controller: _title_controller,
                         decoration: InputDecoration(
                           hintText: "Title",
                           hintStyle: TextStyle(color: Colors.white),
@@ -106,7 +111,7 @@ class _NewPageState extends State<NewPage> {
                     TextField(
                       autofocus: true,
                       onChanged: (value) {
-                        widget.onSonChanged(value);
+                        widget.onContentChanged(value);
                       },
                       style: TextStyle(
                         backgroundColor: Colors.black,
@@ -115,7 +120,7 @@ class _NewPageState extends State<NewPage> {
                       ),
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
-                      controller: _controller,
+                      controller: _note_controller,
                       decoration: InputDecoration(
                         hintText: "Note",
                         hintStyle: TextStyle(color: Colors.white),
@@ -135,6 +140,4 @@ class _NewPageState extends State<NewPage> {
     );
     // Image.network("https://images.unsplash.com/photo-1638579837195-3fb3b3287506?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0fHx8ZW58MHx8fHw%3D&auto=format&fit=crop&w=500&q=60", )),
   }
-
-  // void onSonChanged([String value]) {}
 }
