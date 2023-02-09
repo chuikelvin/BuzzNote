@@ -13,6 +13,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late final Box box;
+  late int selected_Index;
+  bool is_Selected = false;
+  deleted(index) {
+    setState(() {
+      content.removeAt(index);
+    });
+    box.put('notes', content);
+  }
+
   List content = [
     // "hello world 123",
     // "welcome \n to \nflutter ",
@@ -78,7 +87,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        print('nah');
+        // print('nah');
+        setState(() {
+          is_Selected = false;
+        });
         return Future.value(false);
       },
       child: Scaffold(
@@ -86,7 +98,29 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           centerTitle: true,
           title: Text('Heros Flutter'),
-          backgroundColor: Colors.black,
+          backgroundColor: is_Selected ? Color.fromARGB(255, 41, 41, 41) : Colors.black,
+          leading: is_Selected
+              ? IconButton(
+                  onPressed: () {
+                    setState(() {
+                      is_Selected = false;
+                    });
+                  },
+                  icon: Icon(Icons.arrow_back))
+              : null,
+          actions: is_Selected
+              ? [
+                  IconButton(
+                      onPressed: () {
+                        setState(() {
+                          is_Selected = false;
+                          content.removeAt(selected_Index);
+                        });
+                        box.put('notes', content);
+                      },
+                      icon: Icon(Icons.delete))
+                ]
+              : [],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -168,9 +202,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                         onLongPress: () {
                           setState(() {
-                            content.removeAt(index);
+                            is_Selected = true;
+                            selected_Index = index;
+                            // content.removeAt(index);
                           });
-                          box.put('notes', content);
+                          // box.put('notes', content);
                           // print("hello");
                         },
                         onTap: () {

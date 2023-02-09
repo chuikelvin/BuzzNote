@@ -47,6 +47,7 @@ class _NewPageState extends State<NewPage> {
           Navigator.pop(context, true);
           // return "empty";
         }
+        _controller.text.trim();
         // print(_controller.text);
         // return Future.value(true);
 
@@ -56,6 +57,15 @@ class _NewPageState extends State<NewPage> {
         backgroundColor: Colors.black,
         appBar: AppBar(
           backgroundColor: Colors.black,
+          title: Text('Note'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.check))
+          ],
           // title: Text('New Screen'),
         ),
         body: SafeArea(
@@ -106,7 +116,7 @@ class _NewPageState extends State<NewPage> {
                     TextField(
                   autofocus: true,
                   onChanged: (value) {
-                    widget.onSonChanged(value);
+                    widget.onSonChanged(value.trim());
                   },
                   style: TextStyle(
                     backgroundColor: Colors.black,
