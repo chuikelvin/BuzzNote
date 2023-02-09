@@ -74,59 +74,59 @@ class _NewPageState extends State<NewPage> {
                     //       color: Colors.green,
                     //       fontSize: 50,
                     //     )),
-                    Column(
-                  children: [
-                    Container(
-                      // padding: EdgeInsets.all(10),
-                      // decoration: BoxDecoration(
-                      //     borderRadius: BorderRadius.circular(10),
-                      //     border: Border.all(color: Colors.grey, width: 1.5)),
-                      child: TextField(
-                        onChanged: (value) {
-                          widget.onSonChanged(value);
-                        },
-                        style: TextStyle(
-                          backgroundColor: Colors.black,
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
-                        // maxLines: null,
-                        // keyboardType: TextInputType.multiline,
-                        // controller: _controller,
-                        decoration: InputDecoration(
-                          hintText: "Title",
-                          hintStyle: TextStyle(color: Colors.white),
-                          border: InputBorder.none,
-                          // filled: false,
-                          fillColor: Colors.transparent,
-                          focusedBorder: InputBorder.none,
-                        ),
-                      ),
-                    ),
+                    //   Column(
+                    // children: [
+                    // Container(
+                    // padding: EdgeInsets.all(10),
+                    // decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(10),
+                    //     border: Border.all(color: Colors.grey, width: 1.5)),
+                    // child: TextField(
+                    //   onChanged: (value) {
+                    //     widget.onSonChanged(value);
+                    //   },
+                    //   style: TextStyle(
+                    //     backgroundColor: Colors.black,
+                    //     color: Colors.white,
+                    //     fontSize: 20,
+                    //   ),
+                    //   // maxLines: null,
+                    //   // keyboardType: TextInputType.multiline,
+                    //   // controller: _controller,
+                    //   decoration: InputDecoration(
+                    //     hintText: "Title",
+                    //     hintStyle: TextStyle(color: Colors.white),
+                    //     border: InputBorder.none,
+                    //     // filled: false,
+                    //     fillColor: Colors.transparent,
+                    //     focusedBorder: InputBorder.none,
+                    //   ),
+                    // ),
+                    // ),
                     TextField(
-                      autofocus: true,
-                      onChanged: (value) {
-                        widget.onSonChanged(value);
-                      },
-                      style: TextStyle(
-                        backgroundColor: Colors.black,
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: "Note",
-                        hintStyle: TextStyle(color: Colors.white),
-                        border: InputBorder.none,
-                        // filled: false,
-                        fillColor: Colors.transparent,
-                        focusedBorder: InputBorder.none,
-                      ),
-                    ),
-                  ],
+                  autofocus: true,
+                  onChanged: (value) {
+                    widget.onSonChanged(value);
+                  },
+                  style: TextStyle(
+                    backgroundColor: Colors.black,
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: "Note",
+                    hintStyle: TextStyle(color: Colors.white),
+                    border: InputBorder.none,
+                    // filled: false,
+                    fillColor: Colors.transparent,
+                    focusedBorder: InputBorder.none,
+                  ),
                 ),
+                // ],
+                // ),
               ),
             ),
           ),
