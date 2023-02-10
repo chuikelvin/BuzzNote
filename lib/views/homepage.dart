@@ -13,9 +13,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late final Box box;
-  late int selected_Index;
+  // late List<int> selected_Index = [];
+  Set<int> selected_Index = new Set();
   bool is_Selected = false;
-  deleted(index) {
+  void deleted(index) {
     setState(() {
       content.removeAt(index);
     });
@@ -88,34 +89,59 @@ class _MyHomePageState extends State<MyHomePage> {
     return WillPopScope(
       onWillPop: () {
         // print('nah');
-        setState(() {
-          is_Selected = false;
-        });
-        return Future.value(false);
+        // setState(() {
+        //   is_Selected = false;
+        // });
+        return Future.value(true);
       },
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           centerTitle: true,
           title: Text('Heros Flutter'),
-          backgroundColor: is_Selected ? Color.fromARGB(255, 41, 41, 41) : Colors.black,
-          leading: is_Selected
-              ? IconButton(
-                  onPressed: () {
-                    setState(() {
-                      is_Selected = false;
-                    });
-                  },
-                  icon: Icon(Icons.arrow_back))
+          backgroundColor: is_Selected && selected_Index.isNotEmpty
+              ? Color.fromARGB(255, 41, 41, 41)
+              : Colors.black,
+          leading: is_Selected && selected_Index.isNotEmpty
+              ? Row(
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            selected_Index.clear();
+                            is_Selected = false;
+                          });
+                        },
+                        icon: Icon(Icons.cancel)),
+                    Center(
+                      child: Container(
+                        width: 8,
+                        child: Text("${selected_Index.length}",
+                            style: TextStyle(
+                              fontSize: 19,
+                            )),
+                      ),
+                    ),
+                  ],
+                )
               : null,
-          actions: is_Selected
+          actions: is_Selected && selected_Index.isNotEmpty
               ? [
                   IconButton(
                       onPressed: () {
+                        for (var index in selected_Index) {
+                          setState(() {
+                            is_Selected = false;
+
+                            content.removeAt(index);
+                          });
+                        }
+
                         setState(() {
-                          is_Selected = false;
-                          content.removeAt(selected_Index);
+                          selected_Index.clear();
                         });
+
                         box.put('notes', content);
                       },
                       icon: Icon(Icons.delete))
@@ -125,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             int index = content.length;
-            print(index);
+            print(selected_Index);
             setState(() {
               content.add("");
             });
@@ -203,11 +229,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         onLongPress: () {
                           setState(() {
                             is_Selected = true;
-                            selected_Index = index;
+                            selected_Index.contains(index)
+                                ? selected_Index.remove(index)
+                                : selected_Index.add(index);
                             // content.removeAt(index);
                           });
                           // box.put('notes', content);
-                          // print("hello");
+                          print(is_Selected);
                         },
                         onTap: () {
                           Navigator.push(
@@ -221,17 +249,29 @@ class _MyHomePageState extends State<MyHomePage> {
                                           });
                                         },
                                         // index: index,
-                                      ))).then((value) => print("back"));
+                                      ))).then((value) => {
+                                if (value == true)
+                                  {
+                                    setState(() {
+                                      content.remove(index);
+                                    }),
+                                    print(value),
+                                    box.put('notes', content)
+                                  }
+                              });
                         },
                         child: Container(
                           padding: EdgeInsets.all(10),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
+                              // color: is_Selected ? Colors.red : null,
                               border: Border.all(
                                   color: content[index].trim().isEmpty
                                       ? Colors.transparent
                                       : Colors.grey,
-                                  width: 1.5)),
+                                  width: selected_Index.contains(index)
+                                      ? 3.5
+                                      : 1.5)),
                           child: Hero(
                               tag: 'dash',
                               child: Material(
@@ -260,5 +300,14 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+}
+
+class displayBox extends StatelessWidget {
+  const displayBox({super.key, required bool});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
