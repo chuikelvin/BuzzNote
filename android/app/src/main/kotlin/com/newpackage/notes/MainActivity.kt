@@ -1,4 +1,4 @@
-package com.example.lessons
+package com.newpackage.notes
 
 import io.flutter.embedding.android.FlutterActivity
 

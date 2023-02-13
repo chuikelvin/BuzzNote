@@ -131,6 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   IconButton(
                       onPressed: () {
                         for (var index in selected_Index) {
+                          print(index);
                           setState(() {
                             is_Selected = false;
 
