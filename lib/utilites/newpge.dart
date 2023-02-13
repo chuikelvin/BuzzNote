@@ -123,6 +123,7 @@ class _NewPageState extends State<NewPage> {
                     color: Colors.white,
                     fontSize: 20,
                   ),
+                  cursorColor: Colors.white,
                   maxLines: null,
                   keyboardType: TextInputType.multiline,
                   controller: _controller,

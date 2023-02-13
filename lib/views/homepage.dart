@@ -84,10 +84,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   double x = 0;
   double y = 0;
+  // double z = 10;
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
+        setState(() {
+          selected_Index.clear();
+        });
         // print('nah');
         // setState(() {
         //   is_Selected = false;
@@ -130,8 +134,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ? [
                   IconButton(
                       onPressed: () {
-                        for (var index in selected_Index) {
-                          print(index);
+                        List toBedel = [];
+                        toBedel.addAll(selected_Index);
+                        toBedel.sort();
+                        var listtobedel = toBedel.reversed;
+                        toBedel = listtobedel.toList();
+                        for (var index in toBedel) {
+                          // print(index);
                           setState(() {
                             is_Selected = false;
 
@@ -143,6 +152,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           selected_Index.clear();
                         });
 
+                        print(toBedel);
+
                         box.put('notes', content);
                       },
                       icon: Icon(Icons.delete))
@@ -152,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             int index = content.length;
-            print(selected_Index);
+            // print(selected_Index);
             setState(() {
               content.add("");
             });
@@ -239,27 +250,35 @@ class _MyHomePageState extends State<MyHomePage> {
                           print(is_Selected);
                         },
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NewPage(
-                                        content[index],
-                                        onSonChanged: (String data) {
-                                          setState(() {
-                                            content[index] = data;
-                                          });
-                                        },
-                                        // index: index,
-                                      ))).then((value) => {
-                                if (value == true)
-                                  {
-                                    setState(() {
-                                      content.remove(index);
-                                    }),
-                                    print(value),
-                                    box.put('notes', content)
-                                  }
-                              });
+                          is_Selected && selected_Index.isNotEmpty
+                              ? setState(() {
+                                  is_Selected = true;
+                                  selected_Index.contains(index)
+                                      ? selected_Index.remove(index)
+                                      : selected_Index.add(index);
+                                  // content.removeAt(index);
+                                })
+                              : Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => NewPage(
+                                            content[index],
+                                            onSonChanged: (String data) {
+                                              setState(() {
+                                                content[index] = data;
+                                              });
+                                            },
+                                            // index: index,
+                                          ))).then((value) => {
+                                    if (value == true)
+                                      {
+                                        setState(() {
+                                          content.remove(index);
+                                        }),
+                                        print(value),
+                                        box.put('notes', content)
+                                      }
+                                  });
                         },
                         child: Container(
                           padding: EdgeInsets.all(10),
