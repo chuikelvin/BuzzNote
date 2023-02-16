@@ -137,8 +137,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         List toBedel = [];
                         toBedel.addAll(selected_Index);
                         toBedel.sort();
-                        var listtobedel = toBedel.reversed;
-                        toBedel = listtobedel.toList();
+                        // var listtobedel = toBedel.reversed;
+
+                        toBedel = toBedel.reversed.toList();
                         for (var index in toBedel) {
                           // print(index);
                           setState(() {
@@ -288,7 +289,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               border: Border.all(
                                   color: content[index].trim().isEmpty
                                       ? Colors.transparent
-                                      : Colors.grey,
+                                      : selected_Index.contains(index)?
+                                      Colors.grey
+                                      : Colors.blueGrey
+                                      ,
                                   width: selected_Index.contains(index)
                                       ? 3.5
                                       : 1.5)),
