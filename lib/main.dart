@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:lessons/views/homepage.dart';
+import 'package:BuzzNote/views/homepage.dart';
 
 Future<void> main() async {
   await Hive.initFlutter();

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:lessons/utilites/dynamic%20list.dart';
-import 'package:lessons/views/page3.dart';
+import 'package:BuzzNote/utilites/dynamic%20list.dart';
+import 'package:BuzzNote/views/page3.dart';
 
 class AnotherPage extends StatefulWidget {
   const AnotherPage({super.key, required});

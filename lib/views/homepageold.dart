@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:lessons/utilites/dynamic%20list.dart';
-import 'package:lessons/views/anotherpage.dart';
-import 'package:lessons/views/grid.dart';
+import 'package:BuzzNote/utilites/dynamic%20list.dart';
+import 'package:BuzzNote/views/anotherpage.dart';
+import 'package:BuzzNote/views/grid.dart';
 
 List items = ['one', 12, 12, 34, 6521234];
 

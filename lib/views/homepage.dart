@@ -100,12 +100,37 @@ class _MyHomePageState extends State<MyHomePage> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
+        drawer: Drawer(
+          // backgroundColor: Colors.blue,
+          // backgroundColor: Colors.black,
+          backgroundColor: Color.fromARGB(255, 31, 31, 31),
+          child: SafeArea(
+              child: Column(
+            children: [
+              Text(
+                'BuzzNote',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  letterSpacing: 4,
+                  color: Colors.white,
+                  fontSize: 19,
+                ),
+              )
+            ],
+          )),
+        ),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          title: Text('Heros Flutter'),
+          title: Text(
+            'BuzzNote',
+            style: TextStyle(
+              letterSpacing: 4,
+            ),
+          ),
           backgroundColor: is_Selected && selected_Index.isNotEmpty
               ? Color.fromARGB(255, 41, 41, 41)
+              // : Color.fromARGB(255, 41, 41, 41),
               : Colors.black,
           leading: is_Selected && selected_Index.isNotEmpty
               ? Row(
@@ -130,6 +155,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 )
               : null,
+              // Builder(builder: (context) {
+              //     return IconButton(
+              //       onPressed: () {
+              //         print("pressed");
+              //         Scaffold.of(context).openDrawer();
+              //       },
+              //       icon: Icon(Icons.menu),
+              //     );
+              //   }),
+          // }            ,
           actions: is_Selected && selected_Index.isNotEmpty
               ? [
                   IconButton(
@@ -157,9 +192,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
                         box.put('notes', content);
                       },
-                      icon: Icon(Icons.delete))
+                      icon: Icon(Icons.delete)),
                 ]
-              : [],
+              : [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.black,
+                        backgroundImage:
+                            AssetImage('assets/icon/ic_round.png')),
+                  )
+                ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -212,6 +256,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20.0,
+                        letterSpacing: 3,
                       )),
                 )
               : StaggeredGridView.countBuilder(
@@ -289,10 +334,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               border: Border.all(
                                   color: content[index].trim().isEmpty
                                       ? Colors.transparent
-                                      : selected_Index.contains(index)?
-                                      Colors.grey
-                                      : Colors.blueGrey
-                                      ,
+                                      : selected_Index.contains(index)
+                                          ? Colors.grey
+                                          : Colors.blueGrey,
                                   width: selected_Index.contains(index)
                                       ? 3.5
                                       : 1.5)),

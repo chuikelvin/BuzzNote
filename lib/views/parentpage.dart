@@ -3,7 +3,7 @@
 /// Inside the Parent Widget
 ///
 import 'package:flutter/material.dart';
-import 'package:lessons/views/callbackpage.dart';
+import 'package:BuzzNote/views/callbackpage.dart';
 
 class Father extends StatefulWidget {
   @override

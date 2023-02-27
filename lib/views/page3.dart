@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:lessons/views/homepage.dart';
+import 'package:BuzzNote/views/homepage.dart';
 
 class Staggering extends StatefulWidget {
   const Staggering({super.key});
