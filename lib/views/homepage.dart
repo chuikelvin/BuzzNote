@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import '../utilites/newpge.dart';
 
@@ -18,6 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final user = FirebaseAuth.instance.currentUser!;
   late final Box box;
   // late List<int> selected_Index = [];
+  bool isInternet = false;
   Set<int> selected_Index = new Set();
   bool is_Selected = false;
   void deleted(index) {
@@ -37,12 +40,57 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     box = Hive.box("notes");
+    checkConnectivity();
+
     // content.isEmpty? content.add("content");
     // for (var i = 0; i < box.length; i++) {
     //   box.deleteAt(i);
     // }
     // box.deleteAt(0);
     box.isEmpty ? print("not") : _getInfo();
+  }
+
+  Future<void> checkConnectivity() async {
+    final Connectivity _connectivity = Connectivity();
+
+    ConnectivityResult connectivityResult =
+        await _connectivity.checkConnectivity();
+
+    // if (connectivityResult == ConnectivityResult.mobile) {
+    //   print("mobile");
+    // } else if (connectivityResult == ConnectivityResult.wifi) {
+    // I am connected to a wifi network.
+    print(connectivityResult.name);
+
+    print("The statement 'this machine is connected to the Internet' is: ");
+    await InternetConnectionChecker().hasConnection.then((value) => setState(
+          () {
+            isInternet = value;
+          },
+        ));
+    // }
+    // late ConnectivityResult result;
+    // // Platform messages may fail, so we use a try/catch PlatformException.
+    // final connectivityResult = await Connectivity()
+    //     .checkConnectivity()
+    //     .then((value) => print(value.toString()));
+
+    // print(connectivityResult.toString());
+    // try {
+    //   result = await _connectivity.checkConnectivity();
+    // } on PlatformException catch (e) {
+    //   developer.log('Couldn\'t check connectivity status', error: e);
+    //   return;
+    // }
+
+    // // If the widget was removed from the tree while the asynchronous platform
+    // // message was in flight, we want to discard the reply rather than calling
+    // // setState to update our non-existent appearance.
+    // if (!mounted) {
+    //   return Future.value(null);
+    // }
+
+    // return _updateConnectionStatus(result);
   }
 
   void updatetext(index, text) {
