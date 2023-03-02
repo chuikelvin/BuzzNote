@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.newpackage.notes">
+    package="com.traffs_ke.BuzzNote">
    <application
         android:label="BuzzNote"
         android:name="${applicationName}"

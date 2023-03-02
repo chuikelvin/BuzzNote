@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "467506631935",
+    "project_id": "cedar-scope-361515",
+    "storage_bucket": "cedar-scope-361515.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:467506631935:android:e238da9faf8869ebc6e8ca",
+        "android_client_info": {
+          "package_name": "com.traffs_ke.BuzzNote"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "467506631935-mfo5ej291qj7b0mb2kda1co99i2bv2ff.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.traffs_ke.BuzzNote",
+            "certificate_hash": "578875eb59cdfd454d36ef0487bf4499607b9b71"
+          }
+        },
+        {
+          "client_id": "467506631935-74ll75gtbur3qmucmc69cmmsprn41r5d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTBdBMkB0ZR-LvvVPSxlLvaYHMX_GhPcQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "467506631935-74ll75gtbur3qmucmc69cmmsprn41r5d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

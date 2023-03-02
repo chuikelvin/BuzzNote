@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 
 import '../utilites/newpge.dart';
@@ -12,6 +15,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final user = FirebaseAuth.instance.currentUser!;
   late final Box box;
   // late List<int> selected_Index = [];
   Set<int> selected_Index = new Set();
@@ -52,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    Hive.close();
+    // Hive.close();
     super.dispose();
   }
 
@@ -120,91 +124,106 @@ class _MyHomePageState extends State<MyHomePage> {
           )),
         ),
         appBar: AppBar(
-          automaticallyImplyLeading: false,
-          centerTitle: true,
-          title: Text(
-            'BuzzNote',
-            style: TextStyle(
-              letterSpacing: 4,
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            title: Text(
+              'BuzzNote',
+              style: TextStyle(
+                letterSpacing: 4,
+              ),
             ),
-          ),
-          backgroundColor: is_Selected && selected_Index.isNotEmpty
-              ? Color.fromARGB(255, 41, 41, 41)
-              // : Color.fromARGB(255, 41, 41, 41),
-              : Colors.black,
-          leading: is_Selected && selected_Index.isNotEmpty
-              ? Row(
-                  children: [
+            backgroundColor: is_Selected && selected_Index.isNotEmpty
+                ? Color.fromARGB(255, 41, 41, 41)
+                // : Color.fromARGB(255, 41, 41, 41),
+                : Colors.black,
+            leading: is_Selected && selected_Index.isNotEmpty
+                ? Row(
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              selected_Index.clear();
+                              is_Selected = false;
+                            });
+                          },
+                          icon: Icon(Icons.cancel)),
+                      Center(
+                        child: Container(
+                          width: 8,
+                          child: Text("${selected_Index.length}",
+                              style: TextStyle(
+                                fontSize: 19,
+                              )),
+                        ),
+                      ),
+                    ],
+                  )
+                : null,
+            // Builder(builder: (context) {
+            //     return IconButton(
+            //       onPressed: () {
+            //         print("pressed");
+            //         Scaffold.of(context).openDrawer();
+            //       },
+            //       icon: Icon(Icons.menu),
+            //     );
+            //   }),
+            // }            ,
+            actions: is_Selected && selected_Index.isNotEmpty
+                ? [
                     IconButton(
                         onPressed: () {
+                          List toBedel = [];
+                          toBedel.addAll(selected_Index);
+                          toBedel.sort();
+                          // var listtobedel = toBedel.reversed;
+
+                          toBedel = toBedel.reversed.toList();
+                          for (var index in toBedel) {
+                            // print(index);
+                            setState(() {
+                              is_Selected = false;
+
+                              content.removeAt(index);
+                            });
+                          }
+
                           setState(() {
                             selected_Index.clear();
-                            is_Selected = false;
                           });
+
+                          print(toBedel);
+
+                          box.put('notes', content);
                         },
-                        icon: Icon(Icons.cancel)),
-                    Center(
+                        icon: Icon(Icons.delete)),
+                  ]
+                : [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Container(
-                        width: 8,
-                        child: Text("${selected_Index.length}",
-                            style: TextStyle(
-                              fontSize: 19,
-                            )),
+                        padding: EdgeInsets.all(10),
+                        child: GestureDetector(
+                          onTap: () {
+                            openDialog();
+                            // FirebaseAuth.instance.signOut();
+                            // GoogleSignIn().signOut();
+                          },
+                          child: CircleAvatar(
+                            radius: 18,
+                            backgroundColor: Colors.black,
+                            backgroundImage: (user.photoURL != null)
+                                ?
+                                //  ?
+                                NetworkImage('${user.photoURL}')
+                                    as ImageProvider
+                                // AssetImage('assets/icon/ic_round.png')
+                                : const AssetImage('assets/icon/ic_round.png'),
+                          ),
+                        ),
                       ),
                     ),
-                  ],
-                )
-              : null,
-              // Builder(builder: (context) {
-              //     return IconButton(
-              //       onPressed: () {
-              //         print("pressed");
-              //         Scaffold.of(context).openDrawer();
-              //       },
-              //       icon: Icon(Icons.menu),
-              //     );
-              //   }),
-          // }            ,
-          actions: is_Selected && selected_Index.isNotEmpty
-              ? [
-                  IconButton(
-                      onPressed: () {
-                        List toBedel = [];
-                        toBedel.addAll(selected_Index);
-                        toBedel.sort();
-                        // var listtobedel = toBedel.reversed;
-
-                        toBedel = toBedel.reversed.toList();
-                        for (var index in toBedel) {
-                          // print(index);
-                          setState(() {
-                            is_Selected = false;
-
-                            content.removeAt(index);
-                          });
-                        }
-
-                        setState(() {
-                          selected_Index.clear();
-                        });
-
-                        print(toBedel);
-
-                        box.put('notes', content);
-                      },
-                      icon: Icon(Icons.delete)),
-                ]
-              : [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.black,
-                        backgroundImage:
-                            AssetImage('assets/icon/ic_round.png')),
-                  )
-                ],
-        ),
+                  ]),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             int index = content.length;
@@ -217,11 +236,27 @@ class _MyHomePageState extends State<MyHomePage> {
                 MaterialPageRoute(
                     builder: (context) => NewPage(
                           content[index],
-                          onSonChanged: (String data) {
+                          onSonChanged: (String data) async {
                             setState(() {
                               content[index] = data;
                             });
                             box.put('notes', content);
+
+                            final docUser = FirebaseFirestore.instance
+                                .collection("notes")
+                                .doc(user.uid);
+                            await docUser.get().then((value) async {
+                              final json = {'${index}': data};
+                              if (value.exists) {
+                                docUser.update(json);
+                              } else {
+                                await docUser.set(json);
+                              }
+                            });
+
+                            // print(doc.exists);
+                            // final json = {'note${index}': data};
+                            // await docUser.set(json);
                           },
                           // index: index,
                         ))).then((value) {
@@ -369,13 +404,75 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-}
 
-class displayBox extends StatelessWidget {
-  const displayBox({super.key, required bool});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
+  Future openDialog() => showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          backgroundColor: Color.fromARGB(255, 31, 31, 31),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              height: 300,
+              // alignment: Alignment.center,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'BuzzNote',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        letterSpacing: 4,
+                        color: Colors.white,
+                        fontSize: 19,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                      child: user.photoURL != null
+                          ? Image.network(user.photoURL.toString())
+                          : Image.asset('assets/icon/ic_round.png'),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "${user.displayName}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        // letterSpacing: 4,
+                        wordSpacing: 4,
+                        color: Colors.white,
+                        fontSize: 22,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    // Text(
+                    //   "${user.email}",
+                    //   textAlign: TextAlign.center,
+                    //   style: TextStyle(
+                    //     // letterSpacing: 4,
+                    //     wordSpacing: 4,
+                    //     color: Colors.white,
+                    //     fontSize: 14,
+                    //   ),
+                    // ),
+                    IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          FirebaseAuth.instance.signOut();
+                          GoogleSignIn().signOut();
+                        },
+                        icon: Icon(
+                          Icons.logout,
+                          color: Colors.white,
+                        ))
+                  ],
+                ),
+              )),
+        ),
+      );
 }
