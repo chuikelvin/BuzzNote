@@ -172,13 +172,29 @@ class _MyHomePageState extends State<MyHomePage> {
             actions: is_Selected && selected_Index.isNotEmpty
                 ? [
                     IconButton(
-                        onPressed: () {
+                        onPressed: () async {
                           List toBedel = [];
                           toBedel.addAll(selected_Index);
                           toBedel.sort();
                           // var listtobedel = toBedel.reversed;
 
                           toBedel = toBedel.reversed.toList();
+                          final docUser = FirebaseFirestore.instance
+                              .collection("notes")
+                              .doc(user.uid);
+                          await docUser.get().then((value) async {
+                            if (value.exists) {
+                              for (var index in toBedel) {
+                                final json = {'${index}': FieldValue.delete()};
+                                docUser.update(json);
+                              }
+                              //   final json = {'${index}': data};
+                              //   if (value.exists) {
+                              //     docUser.update(json);
+                              //   } else {
+                              //     await docUser.set(json);
+                            }
+                          });
                           for (var index in toBedel) {
                             // print(index);
                             setState(() {
@@ -435,8 +451,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         shape: BoxShape.circle,
                       ),
                       child: user.photoURL != null
-                          ? Image.network(user.photoURL.toString())
-                          : Image.asset('assets/icon/ic_round.png'),
+                          ? Image.network(
+                              user.photoURL.toString(),
+                              scale: 2,
+                            )
+                          : Image.asset(
+                              'assets/icon/splash.png',
+                              scale: 2.5,
+                            ),
                     ),
                     SizedBox(height: 20),
                     Text(

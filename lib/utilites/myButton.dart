@@ -5,8 +5,25 @@ import 'package:flutter/src/widgets/placeholder.dart';
 
 class MyButton extends StatefulWidget {
   final Function()? ontap;
+  final String label;
+  Color buttonColor;
+  Color borderColor;
+  Color labelColor;
+  Color activeColor;
+  bool hasIcon;
+  IconData icon;
 
-  MyButton({super.key, required this.ontap});
+  MyButton({
+    super.key,
+    required this.ontap,
+    required this.label,
+    this.labelColor = Colors.black,
+    this.buttonColor = Colors.white,
+    this.borderColor = Colors.white,
+    this.activeColor = Colors.white70,
+    this.hasIcon = false,
+    this.icon = Icons.lock_open,
+  });
 
   @override
   State<MyButton> createState() => _MyButtonState();
@@ -24,27 +41,33 @@ class _MyButtonState extends State<MyButton> {
           istapped = true;
         });
       },
+      onTapCancel: () {
+        setState(() {
+          istapped = false;
+        });
+      },
       onTapUp: (details) {
         setState(() {
           istapped = false;
         });
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+        padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
         margin: EdgeInsets.symmetric(horizontal: 25),
         // width: MediaQuery.of(context).size.width,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-            color: istapped == true ? Colors.white70 : Colors.white,
+            color: istapped == true ? widget.activeColor : widget.buttonColor,
+            border: Border.all(width: 1.5, color: widget.borderColor),
             borderRadius: BorderRadius.circular(18)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lock_open),
+            widget.hasIcon ? Icon(widget.icon) : Container(),
             Text(
-              'Sign In',
+              widget.label,
               style: TextStyle(
-                  color: Colors.black,
+                  color: widget.labelColor,
                   fontWeight: FontWeight.w600,
                   fontSize: 17),
             ),
@@ -82,7 +105,7 @@ class _PictureButtonState extends State<PictureButton> {
           istapped = true;
         });
       },
-      onTapUp: (details) {
+      onTapCancel: () {
         setState(() {
           istapped = false;
         });
