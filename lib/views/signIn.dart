@@ -10,20 +10,53 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class UserActions extends StatefulWidget {
-  UserActions({super.key});
+import '../utilites/errormessage.dart';
+
+class SignIn extends StatefulWidget {
+  final Function()? onTap;
+  final Function() skip;
+  SignIn({super.key, required this.onTap, required this.skip});
 
   @override
-  State<UserActions> createState() => _UserActionsState();
+  State<SignIn> createState() => _SignInState();
 }
 
-class _UserActionsState extends State<UserActions> {
+class _SignInState extends State<SignIn> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   bool isValid = false;
   String validatorText = "";
   bool isComplete = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // String datetime = DateTime.now().toString();
+    // print(datetime);
+    // setState(() {
+    //   emailController.text = datetime;
+    // });
+    // refreshTime();
+  }
+
+  // Future<DateTime> getTime() async {
+  //   return DateTime.now();
+  // }
+
+  // Future<void> refreshTime() async {
+  //   await getTime().then((value) {
+  //     // print(value.toString());
+  //     // print("object");
+  //     value.year;
+  //     var time =
+  //         "${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')} ${value.hour.toString().padLeft(2, '0')}:${value.minute}:${value.second}";
+  //     setState(() {
+  //       emailController.text = time;
+  //     });
+  //     return new Future.delayed(const Duration(seconds: 1), refreshTime);
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -36,15 +69,17 @@ class _UserActionsState extends State<UserActions> {
     if (emailController.text.trim().isNotEmpty &&
         passwordController.text.trim().isNotEmpty) {
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text.trim());
+        await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+                email: emailController.text.trim(),
+                password: passwordController.text.trim())
+            .then((value) => null);
       } on FirebaseAuthException catch (e) {
-        showErrorMessage(e.code.replaceAll("-", " "));
+        showErrorMessage(e.code.replaceAll("-", " "), context);
         // print(e.code);
       }
     } else {
-      showErrorMessage("one or more inputs is incomplete");
+      showErrorMessage("One or more inputs is empty", context);
     }
   }
 
@@ -66,33 +101,10 @@ class _UserActionsState extends State<UserActions> {
     try {
       await FirebaseAuth.instance.signInWithCredential(credential);
     } on FirebaseAuthException catch (e) {
-      showErrorMessage(e.code);
+      showErrorMessage(e.code, context);
       print(e.code);
     }
     Navigator.pop(context);
-  }
-
-  void showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Container(
-        child: Row(
-          children: [
-            Icon(
-              Icons.warning_amber,
-              color: Colors.white,
-            ),
-            Text(message),
-          ],
-        ),
-        padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-            color: Colors.red, borderRadius: BorderRadius.circular(12)),
-      ),
-      // behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.transparent,
-      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-      // showCloseIcon: true,
-    ));
   }
 
   @override
@@ -107,7 +119,7 @@ class _UserActionsState extends State<UserActions> {
             // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                height: 65,
+                height: 15,
               ),
               // Image.asset('assets/icon/feature_graphic.png'),
               Image.asset(
@@ -310,12 +322,14 @@ class _UserActionsState extends State<UserActions> {
                                 fontSize: 16,
                               ),
                               recognizer: TapGestureRecognizer()
-                                ..onTap = () async {
-                                  Navigator.push(context,
-                                      MaterialPageRoute(builder: (context) {
-                                    return SignUP();
-                                  }));
-                                })
+                                ..onTap = () => widget.onTap!()
+                              //   print('Works');
+                              //   // Navigator.push(context,
+                              //   //     MaterialPageRoute(builder: (context) {
+                              //   //   return SignUP();
+                              //   // }));
+                              // }
+                              )
                         ])),
                   ],
                 )),
@@ -325,7 +339,15 @@ class _UserActionsState extends State<UserActions> {
                 height: 20,
               ),
 
-              SkipButton(),
+              // SkipButton(
+              //   skipAction: () {
+              //     Navigator.push(context, MaterialPageRoute(builder: (context) {
+              //       return MyHomePage();
+              //     }));
+              //   },
+              // ),
+
+              SkipButton(skipAction: widget.skip),
 
               // MyButton(
               //   ontap: submit,

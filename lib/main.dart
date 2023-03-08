@@ -1,7 +1,10 @@
-import 'package:BuzzNote/views/useractions.dart';
+import 'package:BuzzNote/controllers/usercontroller.dart';
+import 'package:BuzzNote/views/authPage.dart';
+import 'package:BuzzNote/views/signinorsignup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:BuzzNote/views/homepage.dart';
 
@@ -30,24 +33,17 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
+      initialBinding: UserBinding(),
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: "Kanit-Light",
       ),
 
       // home: const MyHomePage(),
-      home: StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return MyHomePage();
-            } else {
-              return UserActions();
-            }
-          }),
+      home: const AuthPage()
     );
   }
 }

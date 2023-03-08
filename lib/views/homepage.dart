@@ -1,7 +1,10 @@
+// import 'package:BuzzNote/controllers/usercontroller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 
@@ -15,6 +18,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // final user = Get.find<User>();
+  // final userController = Get.find<UserController>();
   final user = FirebaseAuth.instance.currentUser!;
   late final Box box;
   // late List<int> selected_Index = [];
@@ -105,23 +110,14 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         backgroundColor: Colors.black,
         drawer: Drawer(
+          width: 0.8 * MediaQuery.of(context).size.width,
           // backgroundColor: Colors.blue,
           // backgroundColor: Colors.black,
           backgroundColor: Color.fromARGB(255, 31, 31, 31),
-          child: SafeArea(
-              child: Column(
-            children: [
-              Text(
-                'BuzzNote',
-                textAlign: TextAlign.start,
-                style: TextStyle(
-                  letterSpacing: 4,
-                  color: Colors.white,
-                  fontSize: 19,
-                ),
-              )
-            ],
-          )),
+          child: DrawerContent(
+            user: user,
+            // localUser: userController,
+          ),
         ),
         appBar: AppBar(
             automaticallyImplyLeading: false,
@@ -158,17 +154,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ],
                   )
-                : null,
-            // Builder(builder: (context) {
-            //     return IconButton(
-            //       onPressed: () {
-            //         print("pressed");
-            //         Scaffold.of(context).openDrawer();
-            //       },
-            //       icon: Icon(Icons.menu),
-            //     );
-            //   }),
-            // }            ,
+                : Builder(builder: (context) {
+                    return IconButton(
+                      onPressed: () {
+                        print("pressed");
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: Icon(Icons.menu),
+                    );
+                  }),
             actions: is_Selected && selected_Index.isNotEmpty
                 ? [
                     IconButton(
@@ -446,23 +440,30 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     SizedBox(height: 20),
                     Container(
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                      ),
-                      child: user.photoURL != null
-                          ? Image.network(
-                              user.photoURL.toString(),
-                              scale: 2,
-                            )
-                          : Image.asset(
-                              'assets/icon/splash.png',
-                              scale: 2.5,
-                            ),
-                    ),
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                        ),
+                        child: user.photoURL != null
+                            ? Image.network(
+                                user.photoURL.toString(),
+                                scale: 2,
+                              )
+                            : Icon(
+                                Icons.account_circle_outlined,
+                                color: Colors.white,
+                                size: 50,
+                              )
+                        // Image.asset(
+                        //     // 'assets/icon/splash.png',
+                        //     // scale: 2.5,
+                        //     'assets/icon/splash.png',
+                        //     scale: 2.5,
+                        //   ),
+                        ),
                     SizedBox(height: 20),
                     Text(
-                      "${user.displayName}",
+                      user.displayName != null ? "${user.displayName}" : "",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         // letterSpacing: 4,
@@ -483,10 +484,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     //   ),
                     // ),
                     IconButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.of(context).pop();
-                          FirebaseAuth.instance.signOut();
-                          GoogleSignIn().signOut();
+                          if (user.isAnonymous) {
+                            await user.delete();
+                          } else {
+                            FirebaseAuth.instance.signOut();
+                            GoogleSignIn().signOut();
+                          }
                         },
                         icon: Icon(
                           Icons.logout,
@@ -497,4 +502,145 @@ class _MyHomePageState extends State<MyHomePage> {
               )),
         ),
       );
+}
+
+class DrawerContent extends StatelessWidget {
+  User user;
+  // UserController localUser;
+
+  DrawerContent({super.key, required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+        child: Stack(children: [
+      Column(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: Text(
+              'BuzzNote',
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                letterSpacing: 4,
+                color: Colors.white,
+                fontSize: 19,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: Container(
+                clipBehavior: Clip.hardEdge,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle, color: Colors.white24),
+                child: user.photoURL != null
+                    ? Image.network(
+                        user.photoURL.toString(),
+                        scale: 2.2,
+                      )
+                    : Icon(
+                        CupertinoIcons.person,
+                        color: Colors.white,
+                        size: 30,
+                      )),
+            title: Text(
+              user.displayName ?? "",
+              style: TextStyle(color: Colors.white, fontSize: 17),
+            ),
+            subtitle: Text(
+              user.email ?? "local account",
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ),
+          Divider(
+            height: 10,
+            thickness: 0.77,
+            indent: 25,
+            endIndent: 25,
+            color: Colors.white60,
+          ),
+          ListTile(
+            leading: Icon(
+              CupertinoIcons.person,
+              color: Colors.white,
+              size: 20,
+            ),
+            title: Text(
+              "Account",
+              style: TextStyle(color: Colors.white, fontSize: 17),
+            ),
+          ),
+          ListTile(
+            leading: Icon(
+              CupertinoIcons.delete,
+              color: Colors.white,
+              size: 20,
+            ),
+            title: Text(
+              "Deleted",
+              style: TextStyle(color: Colors.white, fontSize: 17),
+            ),
+          ),
+          ListTile(
+            enableFeedback: true,
+            leading: Icon(
+              CupertinoIcons.settings,
+              color: Colors.white,
+              size: 20,
+            ),
+            title: Text(
+              "Settings",
+              style: TextStyle(color: Colors.white, fontSize: 17),
+            ),
+          ),
+          // logout
+          GestureDetector(
+            onTap: () async {
+              Navigator.of(context).pop();
+              if (user.isAnonymous) {
+                await user.delete();
+              } else {
+                FirebaseAuth.instance.signOut();
+                GoogleSignIn().signOut();
+              }
+            },
+            child: ListTile(
+              leading: Icon(
+                Icons.logout,
+                color: Colors.white,
+                size: 20,
+              ),
+              title: Text(
+                "log out",
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+            ),
+          ),
+        ],
+      ),
+      Positioned(
+          bottom: 0,
+          width: 0.8 * MediaQuery.of(context).size.width,
+          child: Container(
+            // color: Colors.blue,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "powered by",
+                  style: TextStyle(color: Colors.white),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Image.asset(
+                    "assets/images/traffsbychui.png",
+                    scale: 5.2,
+                  ),
+                )
+              ],
+            ),
+          ))
+    ]));
+  }
 }

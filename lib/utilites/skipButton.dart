@@ -4,9 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
-class SkipButton extends StatelessWidget {
-  const SkipButton({super.key});
+class SkipButton extends StatefulWidget {
+  Function() skipAction;
 
+  SkipButton({super.key, required this.skipAction});
+
+  @override
+  State<SkipButton> createState() => _SkipButtonState();
+}
+
+class _SkipButtonState extends State<SkipButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -25,14 +32,16 @@ class SkipButton extends StatelessWidget {
                   actions: [
                     CupertinoDialogAction(
                       child: Text("SKIP"),
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signInAnonymously();
+                      onPressed: () {
+                        widget.skipAction();
+                        //   () async {
+                        // await FirebaseAuth.instance.signInAnonymously();
                         CircularProgressIndicator();
                         Navigator.of(context).pop();
-                        // Navigator.push(context,
-                        //     MaterialPageRoute(builder: (context) {
-                        //   return MyHomePage();
-                        // }));
+                        //   // Navigator.push(context,
+                        //   //     MaterialPageRoute(builder: (context) {
+                        //   //   return MyHomePage();
+                        //   // }));
                       },
                     ),
                     CupertinoDialogAction(
