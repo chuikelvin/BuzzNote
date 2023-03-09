@@ -4,7 +4,7 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:BuzzNote/utilites/dynamic%20list.dart';
 import 'package:BuzzNote/views/anotherpage.dart';
-import 'package:BuzzNote/views/grid.dart';
+import 'package:BuzzNote/views/settings_page.dart';
 
 List items = ['one', 12, 12, 34, 6521234];
 

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
-void showErrorMessage(String message, context) {
+void showErrorMessage(String message, context,
+    {color = Colors.red,
+    icon = Icons.warning_amber,
+    double paddingHorizontal = 8,
+    double paddingVertical = 10,
+    int milliSeconds = 1200}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Icon(
-            Icons.warning_amber,
+            icon,
             color: Colors.white,
           ),
           Text(message),
@@ -20,13 +25,13 @@ void showErrorMessage(String message, context) {
               ))
         ],
       ),
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-          color: Colors.red, borderRadius: BorderRadius.circular(12)),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: paddingVertical),
+      decoration:
+          BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
     ),
     // behavior: SnackBarBehavior.floating,
     backgroundColor: Colors.transparent,
-    padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-    // showCloseIcon: true,
+    padding: EdgeInsets.symmetric(vertical: 0, horizontal: paddingHorizontal),
+    duration: Duration(milliseconds: milliSeconds),
   ));
 }

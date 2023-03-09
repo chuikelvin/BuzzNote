@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:BuzzNote/controllers/usercontroller.dart' as userr;
 import 'package:BuzzNote/controllers/usercontroller.dart';
 import 'package:BuzzNote/utilites/errormessage.dart';
 import 'package:BuzzNote/utilites/myButton.dart';
 import 'package:BuzzNote/utilites/myTextfield2.dart';
 import 'package:BuzzNote/utilites/skipButton.dart';
+import 'package:BuzzNote/views/homepagelocal.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
@@ -18,9 +20,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SignUP extends StatefulWidget {
   final void Function()? onTap;
-  final Function() skip;
 
-  SignUP({super.key, required this.onTap, required this.skip});
+  SignUP({super.key, required this.onTap});
 
   @override
   State<SignUP> createState() => _SignUPState();
@@ -33,6 +34,7 @@ class _SignUPState extends State<SignUP> {
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
 
+  // final userController = Get.find<User>();
   final userController = Get.find<UserController>();
 
   bool isChecked = false;
@@ -62,6 +64,7 @@ class _SignUPState extends State<SignUP> {
         password: passwordController.text.trim(),
       );
       User? user = result.user;
+      await user?.sendEmailVerification();
       user!.updateDisplayName(
           "${firstNameController.text.trim()} ${lastNameController.text.trim()}");
       // newUser.user?.updateDisplayName(
@@ -328,7 +331,14 @@ class _SignUPState extends State<SignUP> {
                 height: 20,
               ),
 
-              SkipButton(skipAction: widget.skip),
+              // SkipButton(skipAction: widget.skip),
+                            SkipButton(
+                skipAction: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return MyHomePageLocal();
+                  }));
+                },
+              ),
             ],
           ),
         ),

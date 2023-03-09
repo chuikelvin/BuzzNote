@@ -2,6 +2,7 @@ import 'package:BuzzNote/utilites/myButton.dart';
 import 'package:BuzzNote/utilites/mytextfield.dart';
 import 'package:BuzzNote/utilites/skipButton.dart';
 import 'package:BuzzNote/views/homepage.dart';
+import 'package:BuzzNote/views/homepagelocal.dart';
 import 'package:BuzzNote/views/signup.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,8 +15,7 @@ import '../utilites/errormessage.dart';
 
 class SignIn extends StatefulWidget {
   final Function()? onTap;
-  final Function() skip;
-  SignIn({super.key, required this.onTap, required this.skip});
+  SignIn({super.key, required this.onTap});
 
   @override
   State<SignIn> createState() => _SignInState();
@@ -110,7 +110,7 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
       body: SafeArea(
           child: Center(
@@ -177,7 +177,96 @@ class _SignInState extends State<SignIn> {
                 height: 7,
               ),
               GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    TextEditingController passwordreset =
+                        TextEditingController();
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(
+                          backgroundColor: Color.fromARGB(255, 31, 31, 31),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          child: Container(
+                            height: 200,
+                            width: MediaQuery.of(context).size.width,
+                            padding: EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 15),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Reset your password",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  "Enter email to receive password reset",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 17),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                TextField(
+                                  controller: passwordreset,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  decoration: InputDecoration(
+                                      isCollapsed: true,
+                                      isDense: true,
+                                      hintText: "Email address",
+                                      hintStyle: TextStyle(color: Colors.white),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 5),
+                                      enabledBorder: OutlineInputBorder(
+                                          borderSide:
+                                              BorderSide(color: Colors.white),
+                                          borderRadius:
+                                              BorderRadius.circular(18))),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                GestureDetector(
+                                    onTap: () async {
+                                      if (passwordreset.text
+                                          .trim()
+                                          .isNotEmpty) {
+                                        // emailController
+                                        await FirebaseAuth.instance
+                                            .sendPasswordResetEmail(
+                                                email:
+                                                    passwordreset.text.trim());
+                                        Navigator.of(context).pop();
+                                      }
+                                    },
+                                    child: Container(
+                                        width: double.infinity,
+                                        alignment: Alignment.center,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 6),
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(12)),
+                                        child: Text(
+                                          "Reset password",
+                                        )))
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  // },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -339,15 +428,16 @@ class _SignInState extends State<SignIn> {
                 height: 20,
               ),
 
-              // SkipButton(
-              //   skipAction: () {
-              //     Navigator.push(context, MaterialPageRoute(builder: (context) {
-              //       return MyHomePage();
-              //     }));
-              //   },
-              // ),
+              SkipButton(
+                skipAction: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return MyHomePageLocal();
+                  }));
+                },
+              ),
 
-              SkipButton(skipAction: widget.skip),
+              // SkipButton(
+              //   skipAction: widget.skip),
 
               // MyButton(
               //   ontap: submit,

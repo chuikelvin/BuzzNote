@@ -1,5 +1,6 @@
 import 'package:BuzzNote/controllers/usercontroller.dart';
-import 'package:BuzzNote/views/authPage.dart';
+import 'package:BuzzNote/views/settings_page.dart';
+// import 'package:BuzzNote/views/authPage.dart';
 import 'package:BuzzNote/views/signinorsignup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -34,16 +35,25 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      initialBinding: UserBinding(),
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: "Kanit-Light",
-      ),
+        // title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        initialBinding: UserBinding(),
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          fontFamily: "Kanit-Light",
+        ),
 
-      // home: const MyHomePage(),
-      home: const AuthPage()
-    );
+        // home: const SettingsPage(),
+        home: Scaffold(
+          body: StreamBuilder<User?>(
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return const MyHomePage();
+                } else {
+                  return SignInOrRegisterPage();
+                }
+              }),
+        ));
   }
 }

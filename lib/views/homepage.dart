@@ -1,4 +1,7 @@
 // import 'package:BuzzNote/controllers/usercontroller.dart';
+import 'package:BuzzNote/utilites/errormessage.dart';
+import 'package:BuzzNote/utilites/firebaseRead.dart';
+import 'package:BuzzNote/views/settings_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -42,12 +45,37 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     box = Hive.box("notes");
-    // content.isEmpty? content.add("content");
-    // for (var i = 0; i < box.length; i++) {
-    //   box.deleteAt(i);
-    // }
-    // box.deleteAt(0);
+    if (user != null) {
+      getOnlineNotes();
+      // data =docUser.get();
+    }
     box.isEmpty ? print("not") : _getInfo();
+  }
+
+  getOnlineNotes() async {
+    // showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return Center(
+    //         child: CircularProgressIndicator(),
+    //       );
+    //     });
+    print("gets here");
+    final docUser =
+        FirebaseFirestore.instance.collection("notes").doc(user.uid);
+    await docUser.get().then((value) async {
+      if (value.data() != null) {
+        var data = value.data()!;
+        data.map(
+          (key, value) {
+            setState(() {
+              content.insert(int.parse(key), value);
+            });
+            return MapEntry(key, value);
+          },
+        );
+      }
+    });
   }
 
   void updatetext(index, text) {
@@ -91,6 +119,46 @@ class _MyHomePageState extends State<MyHomePage> {
     // print('Info retrieved from box: $name ($country)');
   }
 
+  logOut() async {
+    Navigator.of(context).pop();
+    if (user.isAnonymous) {
+      await user.delete();
+    } else {
+      FirebaseAuth.instance.signOut();
+      GoogleSignIn().signOut();
+    }
+  }
+
+  noteHandler(int index) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NewPage(
+                  index: index,
+                  content[index],
+                  onSonChanged: (String data) {
+                    setState(() {
+                      content[index] = data;
+                    });
+                  },
+                  // index: index,
+                ))).then((value) => {
+          if (value == true)
+            {
+              setState(() {
+                content.removeAt(index);
+              }),
+              // print(content),
+              showErrorMessage("Empty notes are not saved", context,
+                  color: Colors.grey[800],
+                  paddingHorizontal: 50,
+                  paddingVertical: 7,
+                  milliSeconds: 600),
+              box.put('notes', content)
+            }
+        });
+  }
+
   double x = 0;
   double y = 0;
   // double z = 10;
@@ -116,6 +184,7 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Color.fromARGB(255, 31, 31, 31),
           child: DrawerContent(
             user: user,
+            logout: () => logOut,
             // localUser: userController,
           ),
         ),
@@ -235,48 +304,30 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ]),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
+          onPressed: () async {
             int index = content.length;
-            // print(selected_Index);
+            // // print(selected_Index);
             setState(() {
               content.add("");
             });
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NewPage(
-                          content[index],
-                          onSonChanged: (String data) async {
-                            setState(() {
-                              content[index] = data;
-                            });
-                            box.put('notes', content);
+            noteHandler(index);
+            // GetNotes();
 
-                            final docUser = FirebaseFirestore.instance
-                                .collection("notes")
-                                .doc(user.uid);
-                            await docUser.get().then((value) async {
-                              final json = {'${index}': data};
-                              if (value.exists) {
-                                docUser.update(json);
-                              } else {
-                                await docUser.set(json);
-                              }
-                            });
-
-                            // print(doc.exists);
-                            // final json = {'note${index}': data};
-                            // await docUser.set(json);
-                          },
-                          // index: index,
-                        ))).then((value) {
-              if (value == true) {
-                setState(() {
-                  content.removeLast();
-                });
-              }
-              print(content.contains(""));
-            });
+            // final docUser =
+            //     FirebaseFirestore.instance.collection("notes").doc(user.uid);
+            // await docUser.get().then((value) async {
+            //   if (value.data() != null) {
+            //     var data = value.data()!;
+            //     data.map(
+            //       (key, value) {
+            //         setState(() {
+            //           content.insert(int.parse(key), value);
+            //         });
+            //         return MapEntry(key, value);
+            //       },
+            //     );
+            //   }
+            // });
           },
           backgroundColor: Colors.black,
           // shape: BeveledRectangleBorder(
@@ -353,6 +404,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => NewPage(
+                                            index: index,
                                             content[index],
                                             onSonChanged: (String data) {
                                               setState(() {
@@ -364,9 +416,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                     if (value == true)
                                       {
                                         setState(() {
-                                          content.remove(index);
+                                          content.removeAt(index);
                                         }),
-                                        print(value),
+                                        // print(content),
+                                        showErrorMessage(
+                                            "Empty notes are not saved",
+                                            context,
+                                            color: Colors.white70),
                                         box.put('notes', content)
                                       }
                                   });
@@ -484,15 +540,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     //   ),
                     // ),
                     IconButton(
-                        onPressed: () async {
-                          Navigator.of(context).pop();
-                          if (user.isAnonymous) {
-                            await user.delete();
-                          } else {
-                            FirebaseAuth.instance.signOut();
-                            GoogleSignIn().signOut();
-                          }
-                        },
+                        onPressed: logOut,
                         icon: Icon(
                           Icons.logout,
                           color: Colors.white,
@@ -506,9 +554,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class DrawerContent extends StatelessWidget {
   User user;
+
+  Function logout;
+  // Function logout()
   // UserController localUser;
 
-  DrawerContent({super.key, required this.user});
+  DrawerContent({super.key, required this.user, required this.logout});
 
   @override
   Widget build(BuildContext context) {
@@ -583,6 +634,11 @@ class DrawerContent extends StatelessWidget {
             ),
           ),
           ListTile(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return SettingsPage();
+              }));
+            },
             enableFeedback: true,
             leading: Icon(
               CupertinoIcons.settings,
@@ -596,15 +652,7 @@ class DrawerContent extends StatelessWidget {
           ),
           // logout
           GestureDetector(
-            onTap: () async {
-              Navigator.of(context).pop();
-              if (user.isAnonymous) {
-                await user.delete();
-              } else {
-                FirebaseAuth.instance.signOut();
-                GoogleSignIn().signOut();
-              }
-            },
+            onTap: logout(),
             child: ListTile(
               leading: Icon(
                 Icons.logout,

@@ -4,9 +4,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
 class SignInOrRegisterPage extends StatefulWidget {
-  final Function() skip;
-
-  SignInOrRegisterPage({super.key, required this.skip});
+  SignInOrRegisterPage({super.key});
 
   @override
   State<SignInOrRegisterPage> createState() => _SignInOrRegisterPageState();
@@ -26,12 +24,10 @@ class _SignInOrRegisterPageState extends State<SignInOrRegisterPage> {
     if (showSignInPage) {
       return SignIn(
         onTap: togglePages,
-        skip: widget.skip,
       );
     } else {
       return SignUP(
         onTap: togglePages,
-        skip: widget.skip,
       );
     }
   }

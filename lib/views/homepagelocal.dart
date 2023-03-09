@@ -1,6 +1,6 @@
 import 'package:BuzzNote/controllers/usercontroller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -18,7 +18,7 @@ class MyHomePageLocal extends StatefulWidget {
 }
 
 class _MyHomePageLocalState extends State<MyHomePageLocal> {
-  var user;
+  final user = Get.find<UserController>();
   late final Box box;
   // late List<int> selected_Index = [];
   Set<int> selected_Index = new Set();
@@ -40,11 +40,11 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
   void initState() {
     super.initState();
     box = Hive.box("notes");
-    try {
-      user = FirebaseAuth.instance.currentUser!;
-    } catch (e) {
-      user = Get.find<UserController>();
-    }
+    // try {
+    //   user = FirebaseAuth.instance.currentUser!;
+    // } catch (e) {
+    //   user = Get.find<User>();
+    // }
     box.isEmpty ? print("not") : _getInfo();
   }
 
@@ -183,27 +183,25 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
 
                           toBedel = toBedel.reversed.toList();
                           try {
-                          final docUser = FirebaseFirestore.instance
-                              .collection("notes")
-                              .doc(user.uid);
-                          await docUser.get().then((value) async {
-                            if (value.exists) {
-                              for (var index in toBedel) {
-                                final json = {'${index}': FieldValue.delete()};
-                                docUser.update(json);
+                            final docUser = FirebaseFirestore.instance
+                                .collection("notes")
+                                .doc(user.uid);
+                            await docUser.get().then((value) async {
+                              if (value.exists) {
+                                for (var index in toBedel) {
+                                  final json = {
+                                    '${index}': FieldValue.delete()
+                                  };
+                                  docUser.update(json);
+                                }
+                                //   final json = {'${index}': data};
+                                //   if (value.exists) {
+                                //     docUser.update(json);
+                                //   } else {
+                                //     await docUser.set(json);
                               }
-                              //   final json = {'${index}': data};
-                              //   if (value.exists) {
-                              //     docUser.update(json);
-                              //   } else {
-                              //     await docUser.set(json);
-                            }
-                          });
-
-                            
-                          } catch (e) {
-                            
-                          }
+                            });
+                          } catch (e) {}
                           for (var index in toBedel) {
                             // print(index);
                             setState(() {
@@ -261,6 +259,7 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => NewPage(
+                      index:index,
                           content[index],
                           onSonChanged: (String data) async {
                             setState(() {
@@ -369,6 +368,7 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => NewPage(
+                                        index:index,
                                             content[index],
                                             onSonChanged: (String data) {
                                               setState(() {
@@ -495,7 +495,8 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
                     //   ),
                     // ),
                     IconButton(
-                        onPressed: () async {
+                        onPressed: () {
+                          Navigator.of(context).pop();
                           Navigator.of(context).pop();
                           // if (user.isAnonymous) {
                           //   await user.delete();
