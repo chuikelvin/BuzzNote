@@ -2,7 +2,8 @@ import 'package:BuzzNote/utilites/myButton.dart';
 import 'package:BuzzNote/utilites/mytextfield.dart';
 import 'package:BuzzNote/utilites/skipButton.dart';
 import 'package:BuzzNote/views/homepage.dart';
-import 'package:BuzzNote/views/signup.dart';
+import 'package:BuzzNote/views/homepagelocal.dart';
+import 'package:BuzzNote/views/sign_up.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,20 +11,52 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class UserActions extends StatefulWidget {
-  UserActions({super.key});
+import '../utilites/errormessage.dart';
+
+class SignIn extends StatefulWidget {
+  final Function()? onTap;
+  SignIn({super.key, required this.onTap});
 
   @override
-  State<UserActions> createState() => _UserActionsState();
+  State<SignIn> createState() => _SignInState();
 }
 
-class _UserActionsState extends State<UserActions> {
+class _SignInState extends State<SignIn> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   bool isValid = false;
   String validatorText = "";
   bool isComplete = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // String datetime = DateTime.now().toString();
+    // print(datetime);
+    // setState(() {
+    //   emailController.text = datetime;
+    // });
+    // refreshTime();
+  }
+
+  // Future<DateTime> getTime() async {
+  //   return DateTime.now();
+  // }
+
+  // Future<void> refreshTime() async {
+  //   await getTime().then((value) {
+  //     // print(value.toString());
+  //     // print("object");
+  //     value.year;
+  //     var time =
+  //         "${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')} ${value.hour.toString().padLeft(2, '0')}:${value.minute}:${value.second}";
+  //     setState(() {
+  //       emailController.text = time;
+  //     });
+  //     return new Future.delayed(const Duration(seconds: 1), refreshTime);
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -36,15 +69,17 @@ class _UserActionsState extends State<UserActions> {
     if (emailController.text.trim().isNotEmpty &&
         passwordController.text.trim().isNotEmpty) {
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text.trim());
+        await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+                email: emailController.text.trim(),
+                password: passwordController.text.trim())
+            .then((value) => null);
       } on FirebaseAuthException catch (e) {
-        showErrorMessage(e.code.replaceAll("-", " "));
+        showErrorMessage(e.code.replaceAll("-", " "), context);
         // print(e.code);
       }
     } else {
-      showErrorMessage("one or more inputs is incomplete");
+      showErrorMessage("One or more inputs is empty", context);
     }
   }
 
@@ -66,39 +101,16 @@ class _UserActionsState extends State<UserActions> {
     try {
       await FirebaseAuth.instance.signInWithCredential(credential);
     } on FirebaseAuthException catch (e) {
-      showErrorMessage(e.code);
+      showErrorMessage(e.code, context);
       print(e.code);
     }
     Navigator.pop(context);
   }
 
-  void showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Container(
-        child: Row(
-          children: [
-            Icon(
-              Icons.warning_amber,
-              color: Colors.white,
-            ),
-            Text(message),
-          ],
-        ),
-        padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-            color: Colors.red, borderRadius: BorderRadius.circular(12)),
-      ),
-      // behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.transparent,
-      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-      // showCloseIcon: true,
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
       body: SafeArea(
           child: Center(
@@ -107,7 +119,7 @@ class _UserActionsState extends State<UserActions> {
             // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                height: 65,
+                height: 15,
               ),
               // Image.asset('assets/icon/feature_graphic.png'),
               Image.asset(
@@ -165,7 +177,96 @@ class _UserActionsState extends State<UserActions> {
                 height: 7,
               ),
               GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    TextEditingController passwordreset =
+                        TextEditingController();
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(
+                          backgroundColor: Color.fromARGB(255, 31, 31, 31),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0)),
+                          child: Container(
+                            height: 200,
+                            width: MediaQuery.of(context).size.width,
+                            padding: EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 15),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Reset your password",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  "Enter email to receive password reset",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 17),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                TextField(
+                                  controller: passwordreset,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  decoration: InputDecoration(
+                                      isCollapsed: true,
+                                      isDense: true,
+                                      hintText: "Email address",
+                                      hintStyle: TextStyle(color: Colors.white),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 5),
+                                      enabledBorder: OutlineInputBorder(
+                                          borderSide:
+                                              BorderSide(color: Colors.white),
+                                          borderRadius:
+                                              BorderRadius.circular(18))),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                GestureDetector(
+                                    onTap: () async {
+                                      if (passwordreset.text
+                                          .trim()
+                                          .isNotEmpty) {
+                                        // emailController
+                                        await FirebaseAuth.instance
+                                            .sendPasswordResetEmail(
+                                                email:
+                                                    passwordreset.text.trim());
+                                        Navigator.of(context).pop();
+                                      }
+                                    },
+                                    child: Container(
+                                        width: double.infinity,
+                                        alignment: Alignment.center,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 6),
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(12)),
+                                        child: Text(
+                                          "Reset password",
+                                        )))
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  // },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -310,12 +411,14 @@ class _UserActionsState extends State<UserActions> {
                                 fontSize: 16,
                               ),
                               recognizer: TapGestureRecognizer()
-                                ..onTap = () async {
-                                  Navigator.push(context,
-                                      MaterialPageRoute(builder: (context) {
-                                    return SignUP();
-                                  }));
-                                })
+                                ..onTap = () => widget.onTap!()
+                              //   print('Works');
+                              //   // Navigator.push(context,
+                              //   //     MaterialPageRoute(builder: (context) {
+                              //   //   return SignUP();
+                              //   // }));
+                              // }
+                              )
                         ])),
                   ],
                 )),
@@ -325,7 +428,16 @@ class _UserActionsState extends State<UserActions> {
                 height: 20,
               ),
 
-              SkipButton(),
+              SkipButton(
+                skipAction: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return MyHomePageLocal();
+                  }));
+                },
+              ),
+
+              // SkipButton(
+              //   skipAction: widget.skip),
 
               // MyButton(
               //   ontap: submit,
