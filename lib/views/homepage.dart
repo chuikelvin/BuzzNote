@@ -1,17 +1,14 @@
-// import 'package:BuzzNote/controllers/usercontroller.dart';
 import 'package:BuzzNote/utilites/errormessage.dart';
-import 'package:BuzzNote/utilites/firebaseRead.dart';
 import 'package:BuzzNote/views/settings_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 
-import '../utilites/newpge.dart';
+import 'note_page.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -23,7 +20,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // final user = Get.find<User>();
   // final userController = Get.find<UserController>();
-  final user = FirebaseAuth.instance.currentUser!;
+  var user = FirebaseAuth.instance.currentUser!;
   late final Box box;
   // late List<int> selected_Index = [];
   Set<int> selected_Index = new Set();
@@ -35,11 +32,9 @@ class _MyHomePageState extends State<MyHomePage> {
     box.put('notes', content);
   }
 
-  List content = [
-    // "hello world 123",
-    // "welcome \n to \nflutter ",
-    // "this \n is \n a \n dynamic\n grid \n view"
-  ];
+  // StreamSubscriber _userChanges;
+
+  List content = [];
 
   @override
   void initState() {
@@ -50,16 +45,50 @@ class _MyHomePageState extends State<MyHomePage> {
       // data =docUser.get();
     }
     box.isEmpty ? print("not") : _getInfo();
+
+    // _userChanges =
+    FirebaseAuth.instance.userChanges().listen((current) {
+      // print("some changes");
+      // print(current);
+      // user?.reload();
+      // setState(() {
+      //   user = user;
+      // });
+    });
+
+    FirebaseFirestore.instance
+        .collection("notes")
+        .doc(user.uid)
+        .snapshots()
+        .listen((event) {
+      var data = event.data()!;
+      data.map(
+        (key, value) {
+          setState(() {
+            // if (int.parse(key) < content.length-1) {
+            //   content[int.parse(key)] = value;
+            // } else {
+            //   content.add(value);
+            // }
+            if (content.contains(value)) {
+              return;
+            }
+            content.add(value);
+            // content.insert(int.parse(key), value);
+          });
+          return MapEntry(key, value);
+        },
+      );
+      // print("some changes");
+    });
   }
 
+// Stream<QuerySnapshot> get notes{
+//   final docUser =
+//         FirebaseFirestore.instance.collection("notes").doc(user.uid).snapshots().listen((event) { });
+//   return;
+// }
   getOnlineNotes() async {
-    // showDialog(
-    //     context: context,
-    //     builder: (context) {
-    //       return Center(
-    //         child: CircularProgressIndicator(),
-    //       );
-    //     });
     print("gets here");
     final docUser =
         FirebaseFirestore.instance.collection("notes").doc(user.uid);
@@ -69,7 +98,17 @@ class _MyHomePageState extends State<MyHomePage> {
         data.map(
           (key, value) {
             setState(() {
-              content.insert(int.parse(key), value);
+              // if (int.parse(key) < content.length - 1) {
+              //   content[int.parse(key)] = value;
+              // } else {
+              //   content.add(value);
+              // }
+              if (content.contains(value)) {
+                return;
+              }
+              content.add(value);
+              // content.add(value);
+              // content.insert(int.parse(key), value);
             });
             return MapEntry(key, value);
           },
@@ -175,299 +214,316 @@ class _MyHomePageState extends State<MyHomePage> {
         // });
         return Future.value(true);
       },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        drawer: Drawer(
-          width: 0.8 * MediaQuery.of(context).size.width,
-          // backgroundColor: Colors.blue,
-          // backgroundColor: Colors.black,
-          backgroundColor: Color.fromARGB(255, 31, 31, 31),
-          child: DrawerContent(
-            user: user,
-            logout: () => logOut,
-            // localUser: userController,
-          ),
-        ),
-        appBar: AppBar(
-            automaticallyImplyLeading: false,
-            centerTitle: true,
-            title: Text(
-              'BuzzNote',
-              style: TextStyle(
-                letterSpacing: 4,
+      child: StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.userChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.data != user) {
+              // print("no change");
+              // setState(() {
+              user = snapshot.data as User;
+              // });
+            }
+            // print(snapshot.data);
+            // print(user);
+            // snapshot.data?.reload();
+            return Scaffold(
+              backgroundColor: Colors.black,
+              drawer: Drawer(
+                width: 0.8 * MediaQuery.of(context).size.width,
+                // backgroundColor: Colors.blue,
+                // backgroundColor: Colors.black,
+                backgroundColor: Color.fromARGB(255, 31, 31, 31),
+                child: DrawerContent(
+                  user: user,
+                  logout: () => logOut,
+                  // localUser: userController,
+                ),
               ),
-            ),
-            backgroundColor: is_Selected && selected_Index.isNotEmpty
-                ? Color.fromARGB(255, 41, 41, 41)
-                // : Color.fromARGB(255, 41, 41, 41),
-                : Colors.black,
-            leading: is_Selected && selected_Index.isNotEmpty
-                ? Row(
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              selected_Index.clear();
-                              is_Selected = false;
-                            });
-                          },
-                          icon: Icon(Icons.cancel)),
-                      Center(
-                        child: Container(
-                          width: 8,
-                          child: Text("${selected_Index.length}",
-                              style: TextStyle(
-                                fontSize: 19,
-                              )),
-                        ),
-                      ),
-                    ],
-                  )
-                : Builder(builder: (context) {
-                    return IconButton(
-                      onPressed: () {
-                        print("pressed");
-                        Scaffold.of(context).openDrawer();
-                      },
-                      icon: Icon(Icons.menu),
-                    );
-                  }),
-            actions: is_Selected && selected_Index.isNotEmpty
-                ? [
-                    IconButton(
-                        onPressed: () async {
-                          List toBedel = [];
-                          toBedel.addAll(selected_Index);
-                          toBedel.sort();
-                          // var listtobedel = toBedel.reversed;
-
-                          toBedel = toBedel.reversed.toList();
-                          final docUser = FirebaseFirestore.instance
-                              .collection("notes")
-                              .doc(user.uid);
-                          await docUser.get().then((value) async {
-                            if (value.exists) {
-                              for (var index in toBedel) {
-                                final json = {'${index}': FieldValue.delete()};
-                                docUser.update(json);
-                              }
-                              //   final json = {'${index}': data};
-                              //   if (value.exists) {
-                              //     docUser.update(json);
-                              //   } else {
-                              //     await docUser.set(json);
-                            }
-                          });
-                          for (var index in toBedel) {
-                            // print(index);
-                            setState(() {
-                              is_Selected = false;
-
-                              content.removeAt(index);
-                            });
-                          }
-
-                          setState(() {
-                            selected_Index.clear();
-                          });
-
-                          print(toBedel);
-
-                          box.put('notes', content);
-                        },
-                        icon: Icon(Icons.delete)),
-                  ]
-                : [
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        child: GestureDetector(
-                          onTap: () {
-                            openDialog();
-                            // FirebaseAuth.instance.signOut();
-                            // GoogleSignIn().signOut();
-                          },
-                          child: CircleAvatar(
-                            radius: 18,
-                            backgroundColor: Colors.black,
-                            backgroundImage: (user.photoURL != null)
-                                ?
-                                //  ?
-                                NetworkImage('${user.photoURL}')
-                                    as ImageProvider
-                                // AssetImage('assets/icon/ic_round.png')
-                                : const AssetImage('assets/icon/ic_round.png'),
-                          ),
-                        ),
-                      ),
+              appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  centerTitle: true,
+                  title: Text(
+                    'BuzzNote',
+                    style: TextStyle(
+                      letterSpacing: 4,
                     ),
-                  ]),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            int index = content.length;
-            // // print(selected_Index);
-            setState(() {
-              content.add("");
-            });
-            noteHandler(index);
-            // GetNotes();
+                  ),
+                  backgroundColor: is_Selected && selected_Index.isNotEmpty
+                      ? Color.fromARGB(255, 41, 41, 41)
+                      // : Color.fromARGB(255, 41, 41, 41),
+                      : Colors.black,
+                  leading: is_Selected && selected_Index.isNotEmpty
+                      ? Row(
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    selected_Index.clear();
+                                    is_Selected = false;
+                                  });
+                                },
+                                icon: Icon(Icons.cancel)),
+                            Center(
+                              child: Container(
+                                width: 8,
+                                child: Text("${selected_Index.length}",
+                                    style: TextStyle(
+                                      fontSize: 19,
+                                    )),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Builder(builder: (context) {
+                          return IconButton(
+                            onPressed: () {
+                              Scaffold.of(context).openDrawer();
+                            },
+                            icon: Icon(Icons.menu),
+                          );
+                        }),
+                  actions: is_Selected && selected_Index.isNotEmpty
+                      ? [
+                          IconButton(
+                              onPressed: () async {
+                                List toBedel = [];
+                                toBedel.addAll(selected_Index);
+                                toBedel.sort();
+                                // var listtobedel = toBedel.reversed;
 
-            // final docUser =
-            //     FirebaseFirestore.instance.collection("notes").doc(user.uid);
-            // await docUser.get().then((value) async {
-            //   if (value.data() != null) {
-            //     var data = value.data()!;
-            //     data.map(
-            //       (key, value) {
-            //         setState(() {
-            //           content.insert(int.parse(key), value);
-            //         });
-            //         return MapEntry(key, value);
-            //       },
-            //     );
-            //   }
-            // });
-          },
-          backgroundColor: Colors.black,
-          // shape: BeveledRectangleBorder(
-          //     borderRadius: BorderRadius.circular(20),
-          //     side: BorderSide(
-          //       color: Colors.grey,
-          //       width: 1.3,
-          //     )),
-          child: Container(
-              // decoration: BoxDecoration(
-              //     border: Border.all(
-              //   color: Colors.grey,
-              // )),
-              child: Icon(Icons.add)),
-        ),
-        body: SafeArea(
-          child: content.isEmpty
-              ? Center(
-                  // color: Colors.red,
-                  child: Text("No Content \n Add notes to display",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                        letterSpacing: 3,
-                      )),
-                )
-              : StaggeredGridView.countBuilder(
-                  crossAxisCount: 2,
-                  // crossAxisCount: isFull ? 1 : 2,
-                  // crossAxisCount: 4,
-                  // crossAxisSpacing: 8,
-                  // mainAxisSpacing: 8,
-                  itemCount: content.length,
-                  // child:
-                  itemBuilder: (BuildContext context, int index) => Container(
-                    padding: EdgeInsets.all(5),
-                    child: Transform.translate(
-                      offset: Offset(x, y),
-                      child: GestureDetector(
-                        onPanUpdate: (details) {
-                          // Swiping in right direction.
-                          print(details.delta.dx);
-                          if (details.delta.dx > 0) {
-                            setState(() {
-                              x = details.delta.dx;
-                            });
-                          }
+                                toBedel = toBedel.reversed.toList();
+                                final docUser = FirebaseFirestore.instance
+                                    .collection("notes")
+                                    .doc(user.uid);
+                                await docUser.get().then((value) async {
+                                  if (value.exists) {
+                                    for (var index in toBedel) {
+                                      final json = {
+                                        '${index}': FieldValue.delete()
+                                      };
+                                      docUser.update(json);
+                                    }
+                                    //   final json = {'${index}': data};
+                                    //   if (value.exists) {
+                                    //     docUser.update(json);
+                                    //   } else {
+                                    //     await docUser.set(json);
+                                  }
+                                });
+                                for (var index in toBedel) {
+                                  // print(index);
+                                  setState(() {
+                                    is_Selected = false;
 
-                          // Swiping in left direction.
-                          if (details.delta.dx < 0) {}
-                        },
-                        onLongPress: () {
-                          setState(() {
-                            is_Selected = true;
-                            selected_Index.contains(index)
-                                ? selected_Index.remove(index)
-                                : selected_Index.add(index);
-                            // content.removeAt(index);
-                          });
-                          // box.put('notes', content);
-                          print(is_Selected);
-                        },
-                        onTap: () {
-                          is_Selected && selected_Index.isNotEmpty
-                              ? setState(() {
+                                    content.removeAt(index);
+                                  });
+                                }
+
+                                setState(() {
+                                  selected_Index.clear();
+                                });
+
+                                print(toBedel);
+
+                                box.put('notes', content);
+                              },
+                              icon: Icon(Icons.delete)),
+                        ]
+                      : [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              child: GestureDetector(
+                                onTap: () {
+                                  openDialog();
+                                  // FirebaseAuth.instance.signOut();
+                                  // GoogleSignIn().signOut();
+                                },
+                                child: CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: Colors.black,
+                                  backgroundImage: (user.photoURL != null)
+                                      ?
+                                      //  ?
+                                      NetworkImage('${user.photoURL}')
+                                          as ImageProvider
+                                      // AssetImage('assets/icon/ic_round.png')
+                                      : const AssetImage(
+                                          'assets/icon/ic_round.png'),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () async {
+                  int index = content.length;
+                  // // print(selected_Index);
+                  setState(() {
+                    content.add("");
+                  });
+                  noteHandler(index);
+                  // GetNotes();
+
+                  // final docUser =
+                  //     FirebaseFirestore.instance.collection("notes").doc(user.uid);
+                  // await docUser.get().then((value) async {
+                  //   if (value.data() != null) {
+                  //     var data = value.data()!;
+                  //     data.map(
+                  //       (key, value) {
+                  //         setState(() {
+                  //           content.insert(int.parse(key), value);
+                  //         });
+                  //         return MapEntry(key, value);
+                  //       },
+                  //     );
+                  //   }
+                  // });
+                },
+                backgroundColor: Colors.black,
+                // shape: BeveledRectangleBorder(
+                //     borderRadius: BorderRadius.circular(20),
+                //     side: BorderSide(
+                //       color: Colors.grey,
+                //       width: 1.3,
+                //     )),
+                child: Container(
+                    // decoration: BoxDecoration(
+                    //     border: Border.all(
+                    //   color: Colors.grey,
+                    // )),
+                    child: Icon(Icons.add)),
+              ),
+              body: SafeArea(
+                child: content.isEmpty
+                    ? Center(
+                        // color: Colors.red,
+                        child: Text("No Content \n Add notes to display",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20.0,
+                              letterSpacing: 3,
+                            )),
+                      )
+                    : StaggeredGridView.countBuilder(
+                        crossAxisCount: 2,
+                        // crossAxisCount: isFull ? 1 : 2,
+                        // crossAxisCount: 4,
+                        // crossAxisSpacing: 8,
+                        // mainAxisSpacing: 8,
+                        itemCount: content.length,
+                        // child:
+                        itemBuilder: (BuildContext context, int index) =>
+                            Container(
+                          padding: EdgeInsets.all(5),
+                          child: Transform.translate(
+                            offset: Offset(x, y),
+                            child: GestureDetector(
+                              onPanUpdate: (details) {
+                                // Swiping in right direction.
+                                print(details.delta.dx);
+                                if (details.delta.dx > 0) {
+                                  setState(() {
+                                    x = details.delta.dx;
+                                  });
+                                }
+
+                                // Swiping in left direction.
+                                if (details.delta.dx < 0) {}
+                              },
+                              onLongPress: () {
+                                setState(() {
                                   is_Selected = true;
                                   selected_Index.contains(index)
                                       ? selected_Index.remove(index)
                                       : selected_Index.add(index);
                                   // content.removeAt(index);
-                                })
-                              : Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => NewPage(
-                                            index: index,
-                                            content[index],
-                                            onSonChanged: (String data) {
+                                });
+                                // box.put('notes', content);
+                                print(is_Selected);
+                              },
+                              onTap: () {
+                                is_Selected && selected_Index.isNotEmpty
+                                    ? setState(() {
+                                        is_Selected = true;
+                                        selected_Index.contains(index)
+                                            ? selected_Index.remove(index)
+                                            : selected_Index.add(index);
+                                        // content.removeAt(index);
+                                      })
+                                    : Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => NewPage(
+                                                  index: index,
+                                                  content[index],
+                                                  onSonChanged: (String data) {
+                                                    setState(() {
+                                                      content[index] = data;
+                                                    });
+                                                  },
+                                                  // index: index,
+                                                ))).then((value) => {
+                                          if (value == true)
+                                            {
                                               setState(() {
-                                                content[index] = data;
-                                              });
-                                            },
-                                            // index: index,
-                                          ))).then((value) => {
-                                    if (value == true)
-                                      {
-                                        setState(() {
-                                          content.removeAt(index);
-                                        }),
-                                        // print(content),
-                                        showErrorMessage(
-                                            "Empty notes are not saved",
-                                            context,
-                                            color: Colors.white70),
-                                        box.put('notes', content)
-                                      }
-                                  });
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              // color: is_Selected ? Colors.red : null,
-                              border: Border.all(
-                                  color: content[index].trim().isEmpty
-                                      ? Colors.transparent
-                                      : selected_Index.contains(index)
-                                          ? Colors.grey
-                                          : Colors.blueGrey,
-                                  width: selected_Index.contains(index)
-                                      ? 3.5
-                                      : 1.5)),
-                          child: Hero(
-                              tag: 'dash',
-                              child: Material(
-                                color: Colors.black,
-                                child: Text(
-                                  "${content[index]}",
-                                  style: TextStyle(
-                                    backgroundColor: Colors.black,
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    //   // debugLabel:
-                                  ),
-                                ),
-                              )),
+                                                content.removeAt(index);
+                                              }),
+                                              // print(content),
+                                              showErrorMessage(
+                                                  "Empty notes are not saved",
+                                                  context,
+                                                  color: Colors.white70),
+                                              box.put('notes', content)
+                                            }
+                                        });
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    // color: is_Selected ? Colors.red : null,
+                                    border: Border.all(
+                                        color: content[index].trim().isEmpty
+                                            ? Colors.transparent
+                                            : selected_Index.contains(index)
+                                                ? Colors.grey
+                                                : Colors.blueGrey,
+                                        width: selected_Index.contains(index)
+                                            ? 3.5
+                                            : 1.5)),
+                                child: Hero(
+                                    tag: 'dash',
+                                    child: Material(
+                                      color: Colors.black,
+                                      child: Text(
+                                        "${content[index]}",
+                                        style: TextStyle(
+                                          backgroundColor: Colors.black,
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          //   // debugLabel:
+                                        ),
+                                      ),
+                                    )),
+                              ),
+                            ),
+                          ),
                         ),
+                        staggeredTileBuilder: (int index) =>
+                            StaggeredTile.fit(1),
+                        // staggeredTileBuilder: StaggeredTile.extent(),
+                        // staggeredTileBuilder: (int index) =>
+                        //     new StaggeredTile.count(2, items[index]),
+                        mainAxisSpacing: 1.2,
+                        crossAxisSpacing: 1.2,
                       ),
-                    ),
-                  ),
-                  staggeredTileBuilder: (int index) => StaggeredTile.fit(1),
-                  // staggeredTileBuilder: StaggeredTile.extent(),
-                  // staggeredTileBuilder: (int index) =>
-                  //     new StaggeredTile.count(2, items[index]),
-                  mainAxisSpacing: 1.2,
-                  crossAxisSpacing: 1.2,
-                ),
-        ),
-      ),
+              ),
+            );
+          }),
     );
   }
 
@@ -581,20 +637,41 @@ class DrawerContent extends StatelessWidget {
             ),
           ),
           ListTile(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return SettingsPage();
+              }));
+            },
             leading: Container(
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle, color: Colors.white24),
+              clipBehavior: Clip.hardEdge,
+              decoration:
+                  BoxDecoration(shape: BoxShape.circle, color: Colors.white24),
+              child: CircleAvatar(
+                radius: 30,
+                backgroundColor: user.photoURL != null
+                    ? Colors.transparent
+                    : Colors.grey[600],
                 child: user.photoURL != null
-                    ? Image.network(
-                        user.photoURL.toString(),
-                        scale: 2.2,
-                      )
+                    ? ClipOval(
+                        // borderRadius: BorderRadius.circular(25),
+                        child: Image.network("${user.photoURL}"))
+                    // child: Image.file(_image!))
                     : Icon(
                         CupertinoIcons.person,
                         color: Colors.white,
-                        size: 30,
-                      )),
+                      ),
+              ),
+              // user.photoURL != null
+              //     ? Image.network(
+              //         user.photoURL.toString(),
+              //         scale: 2.2,
+              //       )
+              //     : Icon(
+              //         CupertinoIcons.person,
+              //         color: Colors.white,
+              //         size: 30,
+              //       )
+            ),
             title: Text(
               user.displayName ?? "",
               style: TextStyle(color: Colors.white, fontSize: 17),
@@ -612,44 +689,54 @@ class DrawerContent extends StatelessWidget {
             color: Colors.white60,
           ),
           ListTile(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return SettingsPage();
+              }));
+            },
             leading: Icon(
               CupertinoIcons.person,
               color: Colors.white,
               size: 20,
             ),
             title: Text(
-              "Account",
+              "Account and settings",
               style: TextStyle(color: Colors.white, fontSize: 17),
             ),
           ),
           ListTile(
-            leading: Icon(
-              CupertinoIcons.delete,
-              color: Colors.white,
-              size: 20,
-            ),
-            title: Text(
-              "Deleted",
-              style: TextStyle(color: Colors.white, fontSize: 17),
-            ),
-          ),
-          ListTile(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return SettingsPage();
-              }));
-            },
+            // onTap: () {
+            //   Navigator.push(context, MaterialPageRoute(builder: (context) {
+            //     return SettingsPage();
+            //   }));
+            // },
             enableFeedback: true,
             leading: Icon(
-              CupertinoIcons.settings,
+              Icons.fingerprint,
               color: Colors.white,
               size: 20,
             ),
             title: Text(
-              "Settings",
+              "Password and security",
               style: TextStyle(color: Colors.white, fontSize: 17),
             ),
           ),
+          // ListTile(
+          //   onTap: () {
+          //     Navigator.push(context, MaterialPageRoute(builder: (context) {
+          //       return DeletedPage();
+          //     }));
+          //   },
+          //   leading: Icon(
+          //     CupertinoIcons.delete,
+          //     color: Colors.white,
+          //     size: 20,
+          //   ),
+          //   title: Text(
+          //     "Deleted",
+          //     style: TextStyle(color: Colors.white, fontSize: 17),
+          //   ),
+          // ),
           // logout
           GestureDetector(
             onTap: logout(),

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:BuzzNote/controllers/usercontroller.dart' as userr;
 import 'package:BuzzNote/controllers/usercontroller.dart';
 import 'package:BuzzNote/utilites/errormessage.dart';
 import 'package:BuzzNote/utilites/myButton.dart';
@@ -11,10 +10,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 
-import 'package:BuzzNote/utilites/mytextfield.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 

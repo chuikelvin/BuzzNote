@@ -3,7 +3,7 @@ import 'package:BuzzNote/utilites/mytextfield.dart';
 import 'package:BuzzNote/utilites/skipButton.dart';
 import 'package:BuzzNote/views/homepage.dart';
 import 'package:BuzzNote/views/homepagelocal.dart';
-import 'package:BuzzNote/views/signup.dart';
+import 'package:BuzzNote/views/sign_up.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';

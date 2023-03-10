@@ -8,7 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 import 'package:get/get.dart';
 
-import '../utilites/newpge.dart';
+import 'note_page.dart';
 
 class MyHomePageLocal extends StatefulWidget {
   const MyHomePageLocal({super.key});

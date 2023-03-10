@@ -1,7 +1,5 @@
 import 'package:BuzzNote/controllers/usercontroller.dart';
-import 'package:BuzzNote/views/settings_page.dart';
-// import 'package:BuzzNote/views/authPage.dart';
-import 'package:BuzzNote/views/signinorsignup.dart';
+import 'package:BuzzNote/views/sign_in_or_sign_up.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +49,7 @@ class _MyAppState extends State<MyApp> {
                 if (snapshot.hasData) {
                   return const MyHomePage();
                 } else {
-                  return SignInOrRegisterPage();
+                  return const SignInOrUpPage();
                 }
               }),
         ));
