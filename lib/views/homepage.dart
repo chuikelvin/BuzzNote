@@ -1,12 +1,15 @@
 import 'package:BuzzNote/utilites/errormessage.dart';
 import 'package:BuzzNote/views/settings_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:encrypt/encrypt.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
+
+import 'package:BuzzNote/utilites/encrypyt_decrypt.dart';
 
 import 'note_page.dart';
 
@@ -21,6 +24,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // final user = Get.find<User>();
   // final userController = Get.find<UserController>();
   var user = FirebaseAuth.instance.currentUser!;
+  late String enkey;
   late final Box box;
   // late List<int> selected_Index = [];
   Set<int> selected_Index = new Set();
@@ -41,6 +45,9 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     box = Hive.box("notes");
     if (user != null) {
+      setState(() {
+        enkey = "  ${user.uid}  ";
+      });
       getOnlineNotes();
       // data =docUser.get();
     }
@@ -62,18 +69,26 @@ class _MyHomePageState extends State<MyHomePage> {
         .snapshots()
         .listen((event) {
       var data = event.data()!;
+      // var list = [];
+      setState(() {
+        content.clear();
+      });
       data.map(
         (key, value) {
           setState(() {
             // if (int.parse(key) < content.length-1) {
-            //   content[int.parse(key)] = value;
+            //   content[int.parse(key)] = value;P
             // } else {
             //   content.add(value);
+            // Encrypted encnote = value;
+            // var note = decryptWithAES(enkey, encnote);
+            String note = decryptWithAES(enkey, value);
+            print(note);
             // }
-            if (content.contains(value)) {
+            if (content.contains(note)) {
               return;
             }
-            content.add(value);
+            content.add(note);
             // content.insert(int.parse(key), value);
           });
           return MapEntry(key, value);
@@ -103,10 +118,14 @@ class _MyHomePageState extends State<MyHomePage> {
               // } else {
               //   content.add(value);
               // }
-              if (content.contains(value)) {
+              // Encrypted encnote = value;
+              var note = decryptWithAES(enkey, value);
+              print(note);
+              // }
+              if (content.contains(note)) {
                 return;
               }
-              content.add(value);
+              content.add(note);
               // content.add(value);
               // content.insert(int.parse(key), value);
             });

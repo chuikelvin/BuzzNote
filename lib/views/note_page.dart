@@ -1,6 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:BuzzNote/utilites/encrypyt_decrypt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:encrypt/encrypt.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -30,11 +33,16 @@ class NewPage extends StatefulWidget {
 
 class _NewPageState extends State<NewPage> {
   final user = FirebaseAuth.instance.currentUser!;
+  late String enkey;
 
   TextEditingController _controller = new TextEditingController();
   @override
   void initState() {
     super.initState();
+
+          setState(() {
+        enkey = "  ${user.uid}  ";
+      });
 
     _controller.text = widget.content.toString();
   }
@@ -45,6 +53,9 @@ class _NewPageState extends State<NewPage> {
   //   super.didUpdateWidget(oldWidget);
   //   print("updated");
   // }
+
+  
+
   Future<bool> onExit() async {
     final docUser =
         FirebaseFirestore.instance.collection("notes").doc(user.uid);
@@ -54,7 +65,10 @@ class _NewPageState extends State<NewPage> {
       docUser.update(json);
     } else {
       Navigator.pop(context);
-      String data = _controller.text.trim();
+      Encrypted encrypted =
+          encryptWithAES("  ${user.uid}  ", _controller.text.trim());
+      String data = encrypted.base64;
+      ;
 
       await docUser.get().then((value) async {
         final json = {'${widget.index}': data};

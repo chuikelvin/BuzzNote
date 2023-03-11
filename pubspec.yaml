@@ -51,6 +51,9 @@ dependencies:
   url_launcher: ^6.1.10
   get: ^4.6.5
   image_cropper: ^3.0.1
+  encrypt: ^5.0.1
+  passcode_screen: ^2.0.1
+  local_auth: ^2.1.6
 
 dev_dependencies:
   flutter_test:
