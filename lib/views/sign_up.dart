@@ -5,7 +5,8 @@ import 'package:BuzzNote/utilites/errormessage.dart';
 import 'package:BuzzNote/utilites/myButton.dart';
 import 'package:BuzzNote/utilites/myTextfield2.dart';
 import 'package:BuzzNote/utilites/skipButton.dart';
-import 'package:BuzzNote/views/homepagelocal.dart';
+import 'package:BuzzNote/views/homepage copy.dart';
+// import 'package:BuzzNote/views/homepagelocal.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
@@ -328,10 +329,10 @@ class _SignUPState extends State<SignUP> {
               ),
 
               // SkipButton(skipAction: widget.skip),
-                            SkipButton(
+              SkipButton(
                 skipAction: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return MyHomePageLocal();
+                    return MyHomePage();
                   }));
                 },
               ),

@@ -32,7 +32,7 @@ class NewPage extends StatefulWidget {
 }
 
 class _NewPageState extends State<NewPage> {
-  final user = FirebaseAuth.instance.currentUser!;
+  final user = FirebaseAuth.instance.currentUser ?? null;
   late String enkey;
 
   TextEditingController _controller = new TextEditingController();
@@ -40,9 +40,9 @@ class _NewPageState extends State<NewPage> {
   void initState() {
     super.initState();
 
-          setState(() {
-        enkey = "  ${user.uid}  ";
-      });
+    setState(() {
+      enkey = "  ${user?.uid}  ";
+    });
 
     _controller.text = widget.content.toString();
   }
@@ -54,65 +54,44 @@ class _NewPageState extends State<NewPage> {
   //   print("updated");
   // }
 
-  
-
   Future<bool> onExit() async {
-    final docUser =
-        FirebaseFirestore.instance.collection("notes").doc(user.uid);
-    if (_controller.text.trim().isEmpty) {
-      Navigator.pop(context, true);
-      final json = {'${widget.index}': FieldValue.delete()};
-      docUser.update(json);
+    if (user != null) {
+      final docUser =
+          FirebaseFirestore.instance.collection("notes").doc(user?.uid);
+      if (_controller.text.trim().isEmpty) {
+        Navigator.pop(context, true);
+        final json = {'${widget.index}': FieldValue.delete()};
+        docUser.update(json);
+      } else {
+        Navigator.pop(context);
+        Encrypted encrypted =
+            encryptWithAES("  ${user?.uid}  ", _controller.text.trim());
+        String data = encrypted.base64;
+        ;
+
+        await docUser.get().then((value) async {
+          final json = {'${widget.index}': data};
+          if (value.exists) {
+            docUser.update(json);
+          } else {
+            await docUser.set(json);
+          }
+        });
+      }
     } else {
-      Navigator.pop(context);
-      Encrypted encrypted =
-          encryptWithAES("  ${user.uid}  ", _controller.text.trim());
-      String data = encrypted.base64;
-      ;
-
-      await docUser.get().then((value) async {
-        final json = {'${widget.index}': data};
-        if (value.exists) {
-          docUser.update(json);
-        } else {
-          await docUser.set(json);
-        }
-      });
+      if (_controller.text.trim().isEmpty) {
+        Navigator.pop(context, true);
+      } else {
+        Navigator.pop(context);
+      }
     }
-
     return Future.value(true);
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: onExit
-      // () {
-      //   if (_controller.text.trim().isEmpty) {
-      //     // Navigator.pop(context, false);
-      //     // return "empty";
-      //   }
-      //   // else {
-      //   //   String data = _controller.text.trim();
-      //   //   final docUser =
-      //   //       FirebaseFirestore.instance.collection("notes").doc(user.uid);
-      //   //   await docUser.get().then((value) async {
-      //   //     final json = {'${widget.index}': data};
-      //   //     if (value.exists) {
-      //   //       docUser.update(json);
-      //   //     } else {
-      //   //       await docUser.set(json);
-      //   //     }
-      //   //   });
-      //   //   print("data");
-      //   // }
-      //   // _controller.text.trim();
-      //   print("_controller.text");
-      //   // return Future.value(true);
-
-      //   // return Future.value(true);
-      // }
-      ,
+      onWillPop: onExit,
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(

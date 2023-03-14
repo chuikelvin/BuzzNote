@@ -1,4 +1,5 @@
 import 'package:BuzzNote/controllers/usercontroller.dart';
+import 'package:BuzzNote/views/homepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,11 +31,7 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
     box.put('notes', content);
   }
 
-  List content = [
-    // "hello world 123",
-    // "welcome \n to \nflutter ",
-    // "this \n is \n a \n dynamic\n grid \n view"
-  ];
+  List content = [];
 
   @override
   void initState() {
@@ -89,6 +86,17 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
     // print('Info retrieved from box: $name ($country)');
   }
 
+  logOut() async {
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+    // if (user.isAnonymous) {
+    //   await user.delete();
+    // } else {
+    //   FirebaseAuth.instance.signOut();
+    //   GoogleSignIn().signOut();
+    // }
+  }
+
   double x = 0;
   double y = 0;
   // double z = 10;
@@ -108,23 +116,15 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
       child: Scaffold(
         backgroundColor: Colors.black,
         drawer: Drawer(
+          width: 0.8 * MediaQuery.of(context).size.width,
           // backgroundColor: Colors.blue,
           // backgroundColor: Colors.black,
           backgroundColor: Color.fromARGB(255, 31, 31, 31),
-          child: SafeArea(
-              child: Column(
-            children: [
-              Text(
-                'BuzzNote',
-                textAlign: TextAlign.start,
-                style: TextStyle(
-                  letterSpacing: 4,
-                  color: Colors.white,
-                  fontSize: 19,
-                ),
-              )
-            ],
-          )),
+          child: DrawerContent(
+            user: user,
+            logout: () => logOut,
+            // localUser: userController,
+          ),
         ),
         appBar: AppBar(
             automaticallyImplyLeading: false,
@@ -161,17 +161,15 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
                       ),
                     ],
                   )
-                : null,
-            // Builder(builder: (context) {
-            //     return IconButton(
-            //       onPressed: () {
-            //         print("pressed");
-            //         Scaffold.of(context).openDrawer();
-            //       },
-            //       icon: Icon(Icons.menu),
-            //     );
-            //   }),
-            // }            ,
+                : Builder(builder: (context) {
+                    return IconButton(
+                      onPressed: () {
+                        print("pressed");
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: Icon(Icons.menu),
+                    );
+                  }),
             actions: is_Selected && selected_Index.isNotEmpty
                 ? [
                     IconButton(
@@ -259,7 +257,7 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => NewPage(
-                      index:index,
+                          index: index,
                           content[index],
                           onSonChanged: (String data) async {
                             setState(() {
@@ -311,7 +309,7 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
           child: content.isEmpty
               ? Center(
                   // color: Colors.red,
-                  child: Text("${user} Content \n Add notes to display",
+                  child: Text("Content \n Add notes to display",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
@@ -368,7 +366,7 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => NewPage(
-                                        index:index,
+                                            index: index,
                                             content[index],
                                             onSonChanged: (String data) {
                                               setState(() {
@@ -495,16 +493,7 @@ class _MyHomePageLocalState extends State<MyHomePageLocal> {
                     //   ),
                     // ),
                     IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).pop();
-                          // if (user.isAnonymous) {
-                          //   await user.delete();
-                          // } else {
-                          //   FirebaseAuth.instance.signOut();
-                          //   GoogleSignIn().signOut();
-                          // }
-                        },
+                        onPressed: logOut,
                         icon: Icon(
                           Icons.logout,
                           color: Colors.white,

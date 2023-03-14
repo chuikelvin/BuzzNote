@@ -628,7 +628,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class DrawerContent extends StatelessWidget {
-  User user;
+  // User user;
+  var user;
 
   Function logout;
   // Function logout()
@@ -696,7 +697,11 @@ class DrawerContent extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontSize: 17),
             ),
             subtitle: Text(
-              user.email ?? "local account",
+              user.email == null
+                  ? user.email
+                  : user.email.toString().trim().isNotEmpty
+                      ? user.email
+                      : "local account",
               style: TextStyle(color: Colors.white, fontSize: 12),
             ),
           ),

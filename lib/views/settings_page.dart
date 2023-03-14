@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:BuzzNote/controllers/usercontroller.dart';
 import 'package:BuzzNote/utilites/set_photo_screen.dart';
+import 'package:BuzzNote/views/sign_in_or_sign_up.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -16,15 +19,36 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final _auth = FirebaseAuth.instance;
-  final user = FirebaseAuth.instance.currentUser!;
+  var user;
+  bool isLoggedin = false;
+  // final user = FirebaseAuth.instance.currentUser!;
   late File _imageFile;
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      user = FirebaseAuth.instance.currentUser!;
+    } catch (e) {
+      user = Get.find<UserController>();
+    }
+
+    if (user.runtimeType == User) {
+      setState(() {
+        isLoggedin = true;
+      });
+    }
+    // box.isEmpty ? print("not") : _getInfo();
+  }
 
   updateImage(File imagefile) {
     print(user.photoURL);
     setState(() {
       _imageFile = imagefile;
     });
-    uploadImageToFirebase();
+    if (isLoggedin) {
+      uploadImageToFirebase();
+    }
   }
 
   Future uploadImageToFirebase() async {
@@ -211,8 +235,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     Text(
                       user.email.toString(),
                       style: TextStyle(
-                          color:
-                              user.emailVerified ? Colors.white : Colors.amber,
+                          color: isLoggedin
+                              ? user.emailVerified
+                                  ? Colors.white
+                                  : Colors.amber
+                              : Colors.red,
                           fontSize: 17),
                     ),
                   ],
@@ -240,33 +267,49 @@ class _SettingsPageState extends State<SettingsPage> {
                 color: Colors.white60,
               ),
               Text(
-                "Danger zone",
+                isLoggedin ? "Danger zone" : "Account option",
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               GestureDetector(
                 onTap: () async {
-                  final docUser = FirebaseFirestore.instance
-                      .collection("notes")
-                      .doc(user.uid)
-                      .delete();
-                  final storageRef = FirebaseStorage.instance.ref();
-                  // Create a reference to the file to delete
-                  final desertRef = storageRef.child('profile/${user.uid}');
+                  if (isLoggedin) {
+                    final docUser = FirebaseFirestore.instance
+                        .collection("notes")
+                        .doc(user.uid)
+                        .delete();
+                    // Create a reference to the file to delete
+                    try {
+                    final storageRef = FirebaseStorage.instance.ref();
+                    final desertRef = storageRef.child('profile/${user.uid}');
 
 // Delete the file
-                  await desertRef.delete();
-                  await user.delete();
-                  Navigator.of(context).pop();
+                    await desertRef.delete();
+                      
+                    } catch (e) {
+                      
+                    }
+                    await user.delete();
+                  } else {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return SignInOrUpPage(isSkippable: false,);
+                    }));
+                    // Navigator.of(context).pop(true);
+                  }
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                      border: Border.all(width: 1, color: Colors.red),
+                      border: Border.all(
+                          width: 1,
+                          color: isLoggedin ? Colors.red : Colors.green),
                       borderRadius: BorderRadius.circular(6)),
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                   child: Text(
-                    "Delete my account",
+                    isLoggedin ? "Delete my account" : "Create my account",
                     style: TextStyle(
-                      color: Colors.red,
+                      color: isLoggedin ? Colors.red : Colors.green,
                       fontSize: 17,
                       // fontWeight: FontWeight.w500,
                       // fontFamily: "Kanit-Thin",

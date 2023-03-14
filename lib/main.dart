@@ -5,7 +5,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:BuzzNote/views/homepage.dart';
+// import 'package:BuzzNote/views/homepage.dart';
+import 'package:BuzzNote/views/homepage copy.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +43,12 @@ class _MyAppState extends State<MyApp> {
         ),
 
         // home: const SettingsPage(),
+        routes: <String, WidgetBuilder> {
+    '/screen1': (BuildContext context) => SignInOrUpPage(),
+    // '/screen2' : (BuildContext context) => Screen2(),
+    // '/screen3' : (BuildContext context) => Screen3(),
+    // '/screen4' : (BuildContext context) => Screen4()
+  },
         home: Scaffold(
           body: StreamBuilder<User?>(
               stream: FirebaseAuth.instance.authStateChanges(),
@@ -49,7 +56,7 @@ class _MyAppState extends State<MyApp> {
                 if (snapshot.hasData) {
                   return const MyHomePage();
                 } else {
-                  return const SignInOrUpPage();
+                  return SignInOrUpPage();
                 }
               }),
         ));

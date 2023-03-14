@@ -12,8 +12,9 @@ class UserBinding implements Bindings {
 // class User extends GetxController {
 class UserController extends GetxController {
   final displayname = "".obs;
-  final photourl = "".obs;
+  final photourl = null.obs;
   final uuid = "".obs;
+  final emailAdress = "".obs;
 
   updateDisplayName(String name) {
     displayname(name);
@@ -27,7 +28,14 @@ class UserController extends GetxController {
     return uuid.string;
   }
 
-  String get photoURL {
-    return photourl.string;
+  get photoURL {
+    // if (condition) {
+
+    // }
+    return photourl.value;
+  }
+
+  String get email {
+    return emailAdress.string;
   }
 }

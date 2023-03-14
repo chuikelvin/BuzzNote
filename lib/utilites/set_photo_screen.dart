@@ -26,7 +26,7 @@ class UserPhoto extends StatefulWidget {
 
 class _UserPhotoState extends State<UserPhoto> {
   File? _image;
-  final user = FirebaseAuth.instance.currentUser!;
+  // final user = FirebaseAuth.instance.currentUser!;
   late File _imageFile;
 
   updateImage(File imagefile) {
@@ -36,10 +36,10 @@ class _UserPhotoState extends State<UserPhoto> {
     });
   }
 
-  Future uploadImageToFirebase() async {
-    final _firebaseStorage = FirebaseStorage.instance;
-    if (_imageFile == null) return;
-  }
+  // Future uploadImageToFirebase() async {
+  //   final _firebaseStorage = FirebaseStorage.instance;
+  //   if (_imageFile == null) return;
+  // }
 
   Future _pickImage(ImageSource source) async {
     try {
@@ -104,11 +104,13 @@ class _UserPhotoState extends State<UserPhoto> {
           child: widget.user.photoURL != null
               ? ClipOval(
                   // borderRadius: BorderRadius.circular(25),
+                  // child: Icon(Icons.person)
                   child: Image.network("${widget.user.photoURL}"))
               // child: Image.file(_image!))
               : Icon(
                   CupertinoIcons.person,
                   color: Colors.white,
+                  size: 45,
                 ),
         ),
         Positioned(

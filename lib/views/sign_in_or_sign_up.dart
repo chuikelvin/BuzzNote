@@ -3,7 +3,9 @@ import 'package:BuzzNote/views/sign_up.dart';
 import 'package:flutter/material.dart';
 
 class SignInOrUpPage extends StatefulWidget {
-  const SignInOrUpPage({super.key});
+  bool isSkippable;
+
+  SignInOrUpPage({super.key, this.isSkippable =true});
 
   @override
   State<SignInOrUpPage> createState() => _SignInOrUpPageState();
@@ -22,6 +24,7 @@ class _SignInOrUpPageState extends State<SignInOrUpPage> {
   Widget build(BuildContext context) {
     if (showSignInPage) {
       return SignIn(
+        isSkippable: widget.isSkippable,
         onTap: togglePages,
       );
     } else {
