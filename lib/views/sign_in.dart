@@ -80,7 +80,7 @@ class _SignInState extends State<SignIn> {
             .then((value) => null);
         if (!isSkippable) {
           Navigator.pop(context);
-          Navigator.pop(context);
+          // Navigator.pop(context);
         }
       } on FirebaseAuthException catch (e) {
         showErrorMessage(e.code.replaceAll("-", " "), context);
@@ -115,7 +115,7 @@ class _SignInState extends State<SignIn> {
     Navigator.pop(context);
     if (!isSkippable) {
       Navigator.pop(context);
-      Navigator.pop(context);
+      // Navigator.pop(context);
       // Navigator.popUntil(context, ModalRoute.withName('/screen1'));
     }
   }

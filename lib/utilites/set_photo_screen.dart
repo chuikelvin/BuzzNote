@@ -30,16 +30,16 @@ class _UserPhotoState extends State<UserPhoto> {
   late File _imageFile;
 
   updateImage(File imagefile) {
-    print(imagefile);
+    // print(imagefile);
     setState(() {
       _imageFile = imagefile;
     });
   }
 
-  // Future uploadImageToFirebase() async {
-  //   final _firebaseStorage = FirebaseStorage.instance;
-  //   if (_imageFile == null) return;
-  // }
+  Future uploadImageToFirebase() async {
+    final _firebaseStorage = FirebaseStorage.instance;
+    if (_imageFile == null) return;
+  }
 
   Future _pickImage(ImageSource source) async {
     try {
@@ -59,6 +59,16 @@ class _UserPhotoState extends State<UserPhoto> {
 
   Future<File?> _cropImage({required File imageFile}) async {
     CroppedFile? croppedImage = await ImageCropper().cropImage(
+        uiSettings: [
+          AndroidUiSettings(
+              backgroundColor: Colors.black,
+              // toolbarTitle: 'Cropper',
+              toolbarColor: Colors.black,
+              toolbarWidgetColor: Colors.white,
+              statusBarColor: Colors.black,
+              initAspectRatio: CropAspectRatioPreset.original,
+              lockAspectRatio: false),
+        ],
         sourcePath: imageFile.path,
         aspectRatio: CropAspectRatio(ratioX: 1.0, ratioY: 1.0));
     if (croppedImage == null) return null;
@@ -105,13 +115,21 @@ class _UserPhotoState extends State<UserPhoto> {
               ? ClipOval(
                   // borderRadius: BorderRadius.circular(25),
                   // child: Icon(Icons.person)
-                  child: Image.network("${widget.user.photoURL}"))
+                  child: _image != null
+                      ? Image.file(_image!)
+                      : Image.network("${widget.user.photoURL}"))
               // child: Image.file(_image!))
-              : Icon(
-                  CupertinoIcons.person,
-                  color: Colors.white,
-                  size: 45,
-                ),
+              : _image != null
+                  ? ClipOval(
+                      // borderRadius: BorderRadius.circular(25),
+                      // child: Icon(Icons.person)
+                      // child: Image.network("${widget.user.photoURL}"))
+                      child: Image.file(_image!))
+                  : Icon(
+                      CupertinoIcons.person,
+                      color: Colors.white,
+                      size: 45,
+                    ),
         ),
         Positioned(
             bottom: 1,

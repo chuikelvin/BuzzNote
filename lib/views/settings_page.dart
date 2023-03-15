@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:BuzzNote/controllers/usercontroller.dart';
+import 'package:BuzzNote/utilites/myButton.dart';
+import 'package:BuzzNote/utilites/myTextfield2.dart';
 import 'package:BuzzNote/utilites/set_photo_screen.dart';
 import 'package:BuzzNote/views/sign_in_or_sign_up.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -68,6 +70,34 @@ class _SettingsPageState extends State<SettingsPage> {
 // await user?.updatePhotoURL("https://example.com/jane-q-user/profile.jpg");
     await _auth.currentUser?.reload();
     // print(downloadUrl);
+  }
+
+  deleteAccount() async {
+    // print("run by self");
+    if (isLoggedin) {
+      final docUser =
+          FirebaseFirestore.instance.collection("notes").doc(user.uid).delete();
+      // Create a reference to the file to delete
+      try {
+        final storageRef = FirebaseStorage.instance.ref();
+        final desertRef = storageRef.child('profile/${user.uid}');
+
+// Delete the file
+        await desertRef.delete();
+      } catch (e) {}
+      await user.delete();
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return SignInOrUpPage(
+          isSkippable: false,
+        );
+      }));
+      // Navigator.of(context).pop(true);
+    }
   }
 
   @override
@@ -245,20 +275,20 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
               ),
-              Divider(
-                height: 5,
-                thickness: 0.5,
-                // indent: 25,
-                // endIndent: 25,
-                color: Colors.white60,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(
-                  "Set up password",
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
-              ),
+              // Divider(
+              //   height: 5,
+              //   thickness: 0.5,
+              //   // indent: 25,
+              //   // endIndent: 25,
+              //   color: Colors.white60,
+              // ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 8.0),
+              //   child: Text(
+              //     "Set up password",
+              //     style: TextStyle(color: Colors.white, fontSize: 18),
+              //   ),
+              // ),
               Divider(
                 height: 5,
                 thickness: 0.5,
@@ -270,57 +300,156 @@ class _SettingsPageState extends State<SettingsPage> {
                 isLoggedin ? "Danger zone" : "Account option",
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
-              GestureDetector(
-                onTap: () async {
-                  if (isLoggedin) {
-                    final docUser = FirebaseFirestore.instance
-                        .collection("notes")
-                        .doc(user.uid)
-                        .delete();
-                    // Create a reference to the file to delete
-                    try {
-                    final storageRef = FirebaseStorage.instance.ref();
-                    final desertRef = storageRef.child('profile/${user.uid}');
-
-// Delete the file
-                    await desertRef.delete();
-                      
-                    } catch (e) {
-                      
-                    }
-                    await user.delete();
-                  } else {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return SignInOrUpPage(isSkippable: false,);
-                    }));
-                    // Navigator.of(context).pop(true);
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 1,
-                          color: isLoggedin ? Colors.red : Colors.green),
-                      borderRadius: BorderRadius.circular(6)),
-                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-                  child: Text(
-                    isLoggedin ? "Delete my account" : "Create my account",
-                    style: TextStyle(
-                      color: isLoggedin ? Colors.red : Colors.green,
-                      fontSize: 17,
-                      // fontWeight: FontWeight.w500,
-                      // fontFamily: "Kanit-Thin",
-                    ),
-                  ),
-                ),
+              HandleAccountDialog(
+                user: user,
+                isLoggedin: isLoggedin,
+                delete: deleteAccount,
               )
             ],
           ),
         )),
       ),
     );
+  }
+}
+
+class HandleAccountDialog extends StatefulWidget {
+  // Future delete;
+  dynamic Function()? delete;
+
+  HandleAccountDialog(
+      {super.key,
+      required this.user,
+      required this.isLoggedin,
+      required this.delete});
+
+  var user;
+  final bool isLoggedin;
+
+  @override
+  State<HandleAccountDialog> createState() => _HandleAccountDialogState();
+}
+
+class _HandleAccountDialogState extends State<HandleAccountDialog> {
+  TextEditingController _controller = TextEditingController();
+  bool emailMatch = false;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        widget.isLoggedin ? deleteAccount(context) : createAccount(context);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border.all(
+                width: 1, color: widget.isLoggedin ? Colors.red : Colors.green),
+            borderRadius: BorderRadius.circular(6)),
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+        child: Text(
+          widget.isLoggedin ? "Delete my account" : "Create/sign in my account",
+          style: TextStyle(
+            color: widget.isLoggedin ? Colors.red : Colors.green,
+            fontSize: 17,
+            // fontWeight: FontWeight.w500,
+            // fontFamily: "Kanit-Thin",
+          ),
+        ),
+      ),
+    );
+  }
+
+  createAccount(context) {
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return SignInOrUpPage(
+        isSkippable: false,
+      );
+    }));
+  }
+
+  Future<dynamic> deleteAccount(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return Dialog(
+                backgroundColor: Color.fromARGB(255, 31, 31, 31),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
+                child: Wrap(children: [
+                  Padding(padding: EdgeInsets.all(8)),
+                  Center(
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      "Delete account",
+                      style: TextStyle(color: Colors.red, fontSize: 17),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 3.0, left: 8.0, right: 8.0, bottom: 8),
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      "This action cannot be undone.\nYour account will be permanently deleted.\nAll notes and data will be removed.\n Please type in your email to confirm",
+                      style: TextStyle(color: Colors.white, fontSize: 17),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 1.0, left: 8.0, right: 8.0, bottom: 8),
+                    child: Center(
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        "${widget.user.email}",
+                        style: TextStyle(color: Colors.red, fontSize: 17),
+                      ),
+                    ),
+                  ),
+                  MyTextField2(
+                      change: (id) {
+                        if (widget.user.email == id) {
+                          setState(() {
+                            emailMatch = true;
+                          });
+                        } else if (emailMatch == true) {
+                          setState(() {
+                            emailMatch = false;
+                          });
+                        }
+                        // return;
+                      },
+                      padding: 8,
+                      hintText: "${widget.user.email}",
+                      hintColor: Colors.white10,
+                      controller: _controller),
+                  MyButton(
+                    ontap: emailMatch ? widget.delete : () {},
+                    label: "Delete Account",
+                    borderColor: emailMatch ? Colors.red : Colors.white10,
+                    buttonColor: Colors.transparent,
+                    labelColor: emailMatch ? Colors.red : Colors.white10,
+                    activeColor: emailMatch ? Colors.black : Colors.white10,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    margin: 12,
+                    verticalPadding: 10,
+                  ),
+                  Padding(padding: EdgeInsets.all(4)),
+                  MyButton(
+                    ontap: () => Navigator.of(context).pop(),
+                    label: "Cancel",
+                    borderColor: Colors.white30,
+                    labelColor: Colors.white,
+                    buttonColor: Colors.transparent,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    margin: 12,
+                    verticalPadding: 10,
+                  ),
+                  Padding(padding: EdgeInsets.all(8)),
+                ]));
+          });
+        });
   }
 }

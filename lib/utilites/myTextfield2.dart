@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-typedef List boolCallback(String id);
+typedef boolCallback(String id);
 
 class MyTextField2 extends StatefulWidget {
   final String hintText;
@@ -16,6 +16,7 @@ class MyTextField2 extends StatefulWidget {
   Color errorColor;
   Color enabledBorder;
   Color focusedBorder;
+  Color hintColor;
 
   MyTextField2({
     super.key,
@@ -25,6 +26,7 @@ class MyTextField2 extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.padding = 25,
+    this.hintColor = Colors.white70,
     this.enabledBorder = Colors.grey,
     this.errorColor = Colors.grey,
     this.focusedBorder = Colors.white,
@@ -88,7 +90,7 @@ class _MyTextField2State extends State<MyTextField2> {
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 hintText: widget.hintText,
-                hintStyle: TextStyle(color: Colors.white70),
+                hintStyle: TextStyle(color: widget.hintColor),
                 enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: widget.enabledBorder),
                     borderRadius: BorderRadius.circular(18)),

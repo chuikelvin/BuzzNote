@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -12,6 +14,11 @@ class MyButton extends StatefulWidget {
   Color activeColor;
   bool hasIcon;
   IconData icon;
+  double borderRadius;
+  double borderWidth;
+  double margin;
+  double verticalPadding;
+  double horizontalPadding;
 
   MyButton({
     super.key,
@@ -21,6 +28,11 @@ class MyButton extends StatefulWidget {
     this.buttonColor = Colors.white,
     this.borderColor = Colors.white,
     this.activeColor = Colors.white70,
+    this.borderRadius = 18,
+    this.borderWidth = 1.5,
+    this.margin = 25,
+    this.verticalPadding = 12,
+    this.horizontalPadding = 25,
     this.hasIcon = false,
     this.icon = Icons.lock_open,
   });
@@ -52,14 +64,17 @@ class _MyButtonState extends State<MyButton> {
         });
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-        margin: EdgeInsets.symmetric(horizontal: 25),
+        padding: EdgeInsets.symmetric(
+            horizontal: widget.horizontalPadding,
+            vertical: widget.verticalPadding),
+        margin: EdgeInsets.symmetric(horizontal: widget.margin),
         // width: MediaQuery.of(context).size.width,
         alignment: Alignment.center,
         decoration: BoxDecoration(
             color: istapped == true ? widget.activeColor : widget.buttonColor,
-            border: Border.all(width: 1.5, color: widget.borderColor),
-            borderRadius: BorderRadius.circular(18)),
+            border: Border.all(
+                width: widget.borderWidth, color: widget.borderColor),
+            borderRadius: BorderRadius.circular(widget.borderRadius)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

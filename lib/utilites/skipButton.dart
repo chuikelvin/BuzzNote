@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 import '../controllers/usercontroller.dart';
 
@@ -22,6 +23,25 @@ class SkipButton extends StatefulWidget {
 class _SkipButtonState extends State<SkipButton> {
   Color borderColor = Colors.black;
   TextEditingController nameController = TextEditingController();
+  late final Box startup;
+
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    startup = Hive.box("startup");
+    startup.isEmpty ? null : useValues();
+  }
+
+  useValues() {
+    for (var item in startup.values) {
+      // print(item);
+      nameController.text = item;
+      //   setState(() {
+      //   content.add(item);
+      // }
+      // );
+    }
+  }
 
   void colorIndicator() {
     if (nameController.text.trim().isEmpty) {
@@ -76,10 +96,9 @@ class _SkipButtonState extends State<SkipButton> {
                                     }
                                   },
                                   onSubmitted: (value) {
-                                    print(value);
+                                    // print(value);
                                   },
                                   controller: nameController,
-                                  autofocus: true,
                                   decoration: InputDecoration(
                                     isDense: true,
                                     isCollapsed: true,
@@ -131,9 +150,11 @@ class _SkipButtonState extends State<SkipButton> {
                               }
                             } else {
                               userController.updateDisplayName(
-                                  "${nameController.text.trim()} ");
+                                  "${nameController.text.trim()}");
                               CircularProgressIndicator();
                               Navigator.of(context).pop();
+                              startup.put(
+                                  "username", nameController.text.trim());
                               widget.skipAction();
                             }
 

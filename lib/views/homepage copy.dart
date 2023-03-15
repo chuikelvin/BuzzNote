@@ -1,6 +1,7 @@
 import 'package:BuzzNote/controllers/usercontroller.dart';
 import 'package:BuzzNote/utilites/errormessage.dart';
 import 'package:BuzzNote/views/settings_page.dart';
+import 'package:BuzzNote/views/sign_in_or_sign_up.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -326,7 +327,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 10,
                   ),
                   Text(
-                    "Would you like to merge or purge.Local notes will be added at the end.",
+                    "Would you like to merge or purge.\n Local notes will be added at the end.",
                     style: TextStyle(color: Colors.white, fontSize: 17),
                   ),
                   SizedBox(
@@ -970,23 +971,23 @@ class DrawerContent extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontSize: 17),
             ),
           ),
-          ListTile(
-            // onTap: () {
-            //   Navigator.push(context, MaterialPageRoute(builder: (context) {
-            //     return SettingsPage();
-            //   }));
-            // },
-            enableFeedback: true,
-            leading: Icon(
-              Icons.fingerprint,
-              color: Colors.white,
-              size: 20,
-            ),
-            title: Text(
-              "Password and security",
-              style: TextStyle(color: Colors.white, fontSize: 17),
-            ),
-          ),
+          // ListTile(
+          //   // onTap: () {
+          //   //   Navigator.push(context, MaterialPageRoute(builder: (context) {
+          //   //     return SettingsPage();
+          //   //   }));
+          //   // },
+          //   enableFeedback: true,
+          //   leading: Icon(
+          //     Icons.fingerprint,
+          //     color: Colors.white,
+          //     size: 20,
+          //   ),
+          //   title: Text(
+          //     "Password and security",
+          //     style: TextStyle(color: Colors.white, fontSize: 17),
+          //   ),
+          // ),
           // ListTile(
           //   onTap: () {
           //     Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -1005,7 +1006,18 @@ class DrawerContent extends StatelessWidget {
           // ),
           // logout
           GestureDetector(
-            onTap: logout(),
+            onTap: isLoggedIn
+                ? logout()
+                : () {
+                    Navigator.of(context).pop();
+                    // Navigator.of(context).pop();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return SignInOrUpPage(
+                        isSkippable: false,
+                      );
+                    }));
+                  },
             child: ListTile(
               leading: Icon(
                 Icons.logout,
@@ -1013,7 +1025,7 @@ class DrawerContent extends StatelessWidget {
                 size: 20,
               ),
               title: Text(
-                isLoggedIn ? "log out" : "exit",
+                isLoggedIn ? "log out" : "log in / create account",
                 style: TextStyle(color: Colors.white, fontSize: 17),
               ),
             ),
