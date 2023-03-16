@@ -5,7 +5,7 @@ import 'package:BuzzNote/utilites/errormessage.dart';
 import 'package:BuzzNote/utilites/myButton.dart';
 import 'package:BuzzNote/utilites/myTextfield2.dart';
 import 'package:BuzzNote/utilites/skipButton.dart';
-import 'package:BuzzNote/views/homepage copy.dart';
+import 'package:BuzzNote/views/homepage.dart';
 // import 'package:BuzzNote/views/homepagelocal.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,7 +19,9 @@ class SignUP extends StatefulWidget {
   final void Function()? onTap;
   bool isSkippable;
 
-  SignUP({super.key, required this.onTap, this.isSkippable = true});
+    int backPress;
+
+  SignUP({super.key, required this.onTap, this.isSkippable = true,this.backPress=0});
 
   @override
   State<SignUP> createState() => _SignUPState();
@@ -66,18 +68,25 @@ class _SignUPState extends State<SignUP> {
         lastNameController.text.trim().isNotEmpty) {
       userController.updateDisplayName(
           "${firstNameController.text.trim()} ${lastNameController.text.trim()}");
-      UserCredential result =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-      User? user = result.user;
-      await user?.sendEmailVerification();
-      user!.updateDisplayName(
-          "${firstNameController.text.trim()} ${lastNameController.text.trim()}");
-      if (!isSkippable) {
-        Navigator.pop(context);
-        Navigator.pop(context);
+      try {
+        UserCredential result =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+        User? user = result.user;
+        await user?.sendEmailVerification();
+        user!.updateDisplayName(
+            "${firstNameController.text.trim()} ${lastNameController.text.trim()}");
+        if (!isSkippable) {
+          for (var i = 0; i <= widget.backPress; i++) {
+          Navigator.pop(context);
+            
+          }
+        }
+      } on FirebaseAuthException catch (e) {
+        showErrorMessage(e.code.replaceAll("-", " "), context);
+        // print(e.code);
       }
       // newUser.user?.updateDisplayName(
       //   "${firstNameController.text.trim()} ${lastNameController.text.trim()}",

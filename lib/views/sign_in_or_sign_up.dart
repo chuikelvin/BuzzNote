@@ -1,4 +1,4 @@
-import 'package:BuzzNote/views/homepage%20copy.dart';
+import 'package:BuzzNote/views/homepage.dart';
 import 'package:BuzzNote/views/sign_in.dart';
 import 'package:BuzzNote/views/sign_up.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +9,13 @@ import 'package:BuzzNote/controllers/usercontroller.dart';
 class SignInOrUpPage extends StatefulWidget {
   bool isSkippable;
   bool isLocal;
+  int backPress;
 
-  SignInOrUpPage({super.key, this.isSkippable = true, this.isLocal = false});
+  SignInOrUpPage(
+      {super.key,
+      this.isSkippable = true,
+      this.isLocal = false,
+      this.backPress = 0});
 
   @override
   State<SignInOrUpPage> createState() => _SignInOrUpPageState();
@@ -51,6 +56,7 @@ class _SignInOrUpPageState extends State<SignInOrUpPage> {
       return SignIn(
         isSkippable: widget.isSkippable,
         onTap: togglePages,
+        backPress:widget.backPress,
       );
     } else if (widget.isLocal) {
       return const MyHomePage();
@@ -58,6 +64,7 @@ class _SignInOrUpPageState extends State<SignInOrUpPage> {
       return SignUP(
         isSkippable: widget.isSkippable,
         onTap: togglePages,
+        backPress:widget.backPress,
       );
     }
   }

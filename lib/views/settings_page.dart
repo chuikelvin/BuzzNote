@@ -94,6 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
       Navigator.push(context, MaterialPageRoute(builder: (context) {
         return SignInOrUpPage(
           isSkippable: false,
+          backPress: 1,
         );
       }));
       // Navigator.of(context).pop(true);
@@ -258,9 +259,24 @@ class _SettingsPageState extends State<SettingsPage> {
                     //         ))
                     //   ]),
                     // ),
-                    Text(
-                      user.displayName.toString(),
-                      style: TextStyle(color: Colors.white, fontSize: 17),
+                    GestureDetector(
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            user.displayName.toString(),
+                            style: TextStyle(color: Colors.white, fontSize: 17),
+                          ),
+                          // SizedBox(
+                          //   width: 6,
+                          // ),
+                          // Icon(
+                          //   Icons.edit,
+                          //   color: Colors.white,
+                          //   size: 16,
+                          // )
+                        ],
+                      ),
                     ),
                     Text(
                       user.email.toString(),
@@ -364,6 +380,7 @@ class _HandleAccountDialogState extends State<HandleAccountDialog> {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       return SignInOrUpPage(
         isSkippable: false,
+        backPress: 1,
       );
     }));
   }
@@ -377,78 +394,90 @@ class _HandleAccountDialogState extends State<HandleAccountDialog> {
                 backgroundColor: Color.fromARGB(255, 31, 31, 31),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0)),
-                child: Wrap(children: [
-                  Padding(padding: EdgeInsets.all(8)),
-                  Center(
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      "Delete account",
-                      style: TextStyle(color: Colors.red, fontSize: 17),
-                    ),
+                child: SingleChildScrollView(
+                  child: Container(
+                    height: 420,
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(padding: EdgeInsets.all(8)),
+                          Center(
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              "Delete account",
+                              style: TextStyle(color: Colors.red, fontSize: 17),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                top: 3.0, left: 8.0, right: 8.0, bottom: 8),
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              "This action cannot be undone.\nYour account will be permanently deleted.\nAll notes and data will be removed.\n Please type in your email to confirm",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 17),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                top: 1.0, left: 8.0, right: 8.0, bottom: 8),
+                            child: Center(
+                              child: Text(
+                                textAlign: TextAlign.center,
+                                "${widget.user.email}",
+                                style:
+                                    TextStyle(color: Colors.red, fontSize: 17),
+                              ),
+                            ),
+                          ),
+                          MyTextField2(
+                              change: (id) {
+                                if (widget.user.email == id) {
+                                  setState(() {
+                                    emailMatch = true;
+                                  });
+                                } else if (emailMatch == true) {
+                                  setState(() {
+                                    emailMatch = false;
+                                  });
+                                }
+                                // return;
+                              },
+                              padding: 8,
+                              hintText: "${widget.user.email}",
+                              hintColor: Colors.white10,
+                              controller: _controller),
+                          MyButton(
+                            ontap: emailMatch ? widget.delete : () {},
+                            label: "Delete Account",
+                            borderColor:
+                                emailMatch ? Colors.red : Colors.white10,
+                            buttonColor: Colors.transparent,
+                            labelColor:
+                                emailMatch ? Colors.red : Colors.white10,
+                            activeColor:
+                                emailMatch ? Colors.black : Colors.white10,
+                            borderRadius: 10,
+                            borderWidth: 1,
+                            margin: 12,
+                            verticalPadding: 10,
+                          ),
+                          Padding(padding: EdgeInsets.all(4)),
+                          MyButton(
+                            ontap: () => Navigator.of(context).pop(),
+                            label: "Cancel",
+                            borderColor: Colors.white30,
+                            labelColor: Colors.white,
+                            buttonColor: Colors.transparent,
+                            borderRadius: 10,
+                            borderWidth: 1,
+                            margin: 12,
+                            verticalPadding: 10,
+                          ),
+                          Padding(padding: EdgeInsets.all(8)),
+                        ]),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        top: 3.0, left: 8.0, right: 8.0, bottom: 8),
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      "This action cannot be undone.\nYour account will be permanently deleted.\nAll notes and data will be removed.\n Please type in your email to confirm",
-                      style: TextStyle(color: Colors.white, fontSize: 17),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        top: 1.0, left: 8.0, right: 8.0, bottom: 8),
-                    child: Center(
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        "${widget.user.email}",
-                        style: TextStyle(color: Colors.red, fontSize: 17),
-                      ),
-                    ),
-                  ),
-                  MyTextField2(
-                      change: (id) {
-                        if (widget.user.email == id) {
-                          setState(() {
-                            emailMatch = true;
-                          });
-                        } else if (emailMatch == true) {
-                          setState(() {
-                            emailMatch = false;
-                          });
-                        }
-                        // return;
-                      },
-                      padding: 8,
-                      hintText: "${widget.user.email}",
-                      hintColor: Colors.white10,
-                      controller: _controller),
-                  MyButton(
-                    ontap: emailMatch ? widget.delete : () {},
-                    label: "Delete Account",
-                    borderColor: emailMatch ? Colors.red : Colors.white10,
-                    buttonColor: Colors.transparent,
-                    labelColor: emailMatch ? Colors.red : Colors.white10,
-                    activeColor: emailMatch ? Colors.black : Colors.white10,
-                    borderRadius: 10,
-                    borderWidth: 1,
-                    margin: 12,
-                    verticalPadding: 10,
-                  ),
-                  Padding(padding: EdgeInsets.all(4)),
-                  MyButton(
-                    ontap: () => Navigator.of(context).pop(),
-                    label: "Cancel",
-                    borderColor: Colors.white30,
-                    labelColor: Colors.white,
-                    buttonColor: Colors.transparent,
-                    borderRadius: 10,
-                    borderWidth: 1,
-                    margin: 12,
-                    verticalPadding: 10,
-                  ),
-                  Padding(padding: EdgeInsets.all(8)),
-                ]));
+                ));
           });
         });
   }

@@ -1,13 +1,18 @@
+import 'package:BuzzNote/controllers/usercontroller.dart';
 import 'package:BuzzNote/utilites/errormessage.dart';
 import 'package:BuzzNote/views/settings_page.dart';
+import 'package:BuzzNote/views/sign_in_or_sign_up.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
+
+import 'package:get/get.dart';
 
 import 'package:BuzzNote/utilites/encrypyt_decrypt.dart';
 
@@ -23,12 +28,17 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // final user = Get.find<User>();
   // final userController = Get.find<UserController>();
-  var user = FirebaseAuth.instance.currentUser!;
+  bool isLoggedin = false;
+  var user;
+  // var user = FirebaseAuth.instance.currentUser??Get.find<UserController>();
   late String enkey;
   late final Box box;
   // late List<int> selected_Index = [];
-  Set<int> selected_Index = new Set();
+  Set<int> selected_Index = {};
   bool is_Selected = false;
+
+  bool isDifferent = false;
+
   void deleted(index) {
     setState(() {
       content.removeAt(index);
@@ -39,63 +49,68 @@ class _MyHomePageState extends State<MyHomePage> {
   // StreamSubscriber _userChanges;
 
   List content = [];
+  List fetched = [];
+  Map notesMap = {};
 
   @override
   void initState() {
     super.initState();
     box = Hive.box("notes");
-    if (user != null) {
-      setState(() {
-        enkey = "  ${user.uid}  ";
-      });
-      getOnlineNotes();
-      // data =docUser.get();
+    try {
+      user = FirebaseAuth.instance.currentUser!;
+    } catch (e) {
+      user = Get.find<UserController>();
     }
-    box.isEmpty ? print("not") : _getInfo();
+    if (user.runtimeType == User) {
+      if (user != null) {
+        setState(() {
+          isLoggedin = true;
+          enkey = "  ${user.uid}  ";
+        });
+        // getOnlineNotes().then((value) => null);
+        // print(fetched.length);
+        // data =docUser.get();
+      }
 
-    // _userChanges =
-    FirebaseAuth.instance.userChanges().listen((current) {
-      // print("some changes");
-      // print(current);
-      // user?.reload();
-      // setState(() {
-      //   user = user;
+      // FirebaseFirestore.instance
+      //     .collection("notes")
+      //     .doc(user.uid)
+      //     .snapshots()
+      //     .listen((event) {
+      //   var data = event.data()!;
+      //   // var list = [];
+      //   setState(() {
+      //     content.clear();
+      //   });
+      //   data.map(
+      //     (key, value) {
+      //       setState(() {
+      //         // if (int.parse(key) < content.length-1) {
+      //         //   content[int.parse(key)] = value;P
+      //         // } else {
+      //         //   content.add(value);
+      //         // Encrypted encnote = value;
+      //         // var note = decryptWithAES(enkey, encnote);
+      //         String note = decryptWithAES(enkey, value);
+      //         print(note);
+      //         // }
+      //         if (content.contains(note)) {
+      //           return;
+      //         }
+      //         content.add(note);
+      //         // content.insert(int.parse(key), value);
+      //       });
+      //       return MapEntry(key, value);
+      //     },
+      //   );
+
       // });
-    });
+    } else {}
 
-    FirebaseFirestore.instance
-        .collection("notes")
-        .doc(user.uid)
-        .snapshots()
-        .listen((event) {
-      var data = event.data()!;
-      // var list = [];
-      setState(() {
-        content.clear();
-      });
-      data.map(
-        (key, value) {
-          setState(() {
-            // if (int.parse(key) < content.length-1) {
-            //   content[int.parse(key)] = value;P
-            // } else {
-            //   content.add(value);
-            // Encrypted encnote = value;
-            // var note = decryptWithAES(enkey, encnote);
-            String note = decryptWithAES(enkey, value);
-            print(note);
-            // }
-            if (content.contains(note)) {
-              return;
-            }
-            content.add(note);
-            // content.insert(int.parse(key), value);
-          });
-          return MapEntry(key, value);
-        },
-      );
-      // print("some changes");
-    });
+    box.isEmpty
+        ? null
+        : WidgetsBinding.instance.addPostFrameCallback((_) => _getInfo());
+    ;
   }
 
 // Stream<QuerySnapshot> get notes{
@@ -103,13 +118,17 @@ class _MyHomePageState extends State<MyHomePage> {
 //         FirebaseFirestore.instance.collection("notes").doc(user.uid).snapshots().listen((event) { });
 //   return;
 // }
-  getOnlineNotes() async {
-    print("gets here");
+  Future getOnlineNotes(
+      {bool addToLocal = false, bool preventDuplicates = false}) async {
     final docUser =
         FirebaseFirestore.instance.collection("notes").doc(user.uid);
     await docUser.get().then((value) async {
       if (value.data() != null) {
         var data = value.data()!;
+        // setState(() {
+        //   notesMap = data;
+        // });
+        // print(data);
         data.map(
           (key, value) {
             setState(() {
@@ -120,12 +139,13 @@ class _MyHomePageState extends State<MyHomePage> {
               // }
               // Encrypted encnote = value;
               var note = decryptWithAES(enkey, value);
-              print(note);
+              // print(note);
+              notesMap.addAll({key: note});
               // }
-              if (content.contains(note)) {
+              if (content.contains(note) && preventDuplicates == true) {
                 return;
               }
-              content.add(note);
+              addToLocal ? content.add(note) : fetched.add(note);
               // content.add(value);
               // content.insert(int.parse(key), value);
             });
@@ -136,58 +156,237 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void updatetext(index, text) {
-    // print(context);
-    setState(() {
-      content[index] = text;
-    });
+  // void updatetext(index, text) {
+  //   // print(context);
+  //   setState(() {
+  //     content[index] = text;
+  //   });
 
-    box.add(content);
-  }
+  //   box.add(content);
+  // }
 
   @override
   void dispose() {
-    // Hive.close();
     super.dispose();
   }
 
-  _addInfo() async {
-    // Storing key-value pair
-    // box.add('John');
-    for (var item in box.values) {
-      print(item);
-    }
-    box.add(content);
-    // print('Info added to box!');
-  }
-
   _getInfo() {
-    for (var item in box.values) {
-      print(item);
-      //   setState(() {
-      //   content.add(item);
-      // }
-      // );
-    }
+    // for (var item in box.values) {
+    //   print(item);
+    //   //   setState(() {
+    //   //   content.add(item);
+    //   // }
+    //   // );
+    // }
     setState(() {
       content.addAll(box.get('notes'));
     });
-    // box.get('name');
-    // var country = box.get('country');
-    // print('Info retrieved from box: $name ($country)');
+    // print(listEquals(content, fetched));
+    if (isLoggedin) {
+      getOnlineNotes().then((value) {
+        var sortedContent = content;
+        var sortedfetched = fetched;
+        sortedContent.sort();
+        sortedfetched.sort();
+        print(sortedContent);
+        print(sortedfetched);
+        if (!listEquals(sortedContent, sortedfetched) &&
+            sortedContent.isNotEmpty) {
+          setState(() {
+            isDifferent = true;
+          });
+        }
+        if (isDifferent) mergeorpurge();
+
+        FirebaseFirestore.instance
+            .collection("notes")
+            .doc(user.uid)
+            .snapshots()
+            .listen((event) {
+          var data = event.data()!;
+          // var list = [];
+          setState(() {
+            if (!isDifferent) content.clear();
+          });
+          data.map(
+            (key, value) {
+              setState(() {
+                // if (int.parse(key) < content.length-1) {
+                //   content[int.parse(key)] = value;P
+                // } else {
+                //   content.add(value);
+                // Encrypted encnote = value;
+                // var note = decryptWithAES(enkey, encnote);
+                String note = decryptWithAES(enkey, value);
+                // print(note);
+                // }
+                if (content.contains(note)) {
+                  return;
+                }
+                content.add(note);
+                // content.insert(int.parse(key), value);
+              });
+              return MapEntry(key, value);
+            },
+          );
+        });
+      });
+    }
+
+// )
+  }
+
+  merge() async {
+    final docUser =
+        FirebaseFirestore.instance.collection("notes").doc(user?.uid);
+    // if (_controller.text.trim().isEmpty) {
+    //   Navigator.pop(context, true);
+    //   final json = {'${widget.index}': FieldValue.delete()};
+    //   docUser.update(json);
+    // } else {
+    //   Navigator.pop(context);
+    Map<String, String> map = {};
+    for (var i = 0; i < content.length; i++) {
+      if (fetched.contains(content[i])) {
+        continue;
+      }
+      Encrypted encrypted = encryptWithAES("  ${user?.uid}  ", content[i]);
+      String data = encrypted.base64;
+      if (fetched.length == 0) {
+        map.addAll({"${fetched.length + i}": data});
+      } else {
+        map.addAll({"${fetched.length + 1 + i}": data});
+      }
+    }
+
+    // print(fetched.length);
+    // print('seems');
+    // map.forEach((key, value) {
+    //   print(key + "  " + value);
+    // });
+
+    await docUser.get().then((value) async {
+      // final json = {'${widget.index}': data};
+      if (value.exists) {
+        docUser.update(map);
+      } else {
+        await docUser.set(map);
+      }
+    }).then((value) {
+      setState(() {
+        isDifferent = false;
+        fetched.clear();
+        content.clear();
+      });
+      getOnlineNotes(addToLocal: true, preventDuplicates: true).then((value) {
+        print(content);
+        setState(() {
+          // content.addAll(fetched);
+        });
+        box.put('notes', content);
+      });
+    });
+    Navigator.pop(context);
+  }
+  // }
+
+  purge() {
+    setState(() {
+      content.clear();
+      box.put('notes', content);
+      isDifferent = false;
+    });
+
+    getOnlineNotes(addToLocal: true);
+    Navigator.pop(context);
+  }
+
+  Future<dynamic> mergeorpurge() {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            backgroundColor: Color.fromARGB(255, 31, 31, 31),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0)),
+            child: Container(
+              height: 200,
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Local notes found",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Would you like to merge or purge.\n Local notes will be added at the end.",
+                    style: TextStyle(color: Colors.white, fontSize: 17),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      GestureDetector(
+                          onTap: merge,
+                          child: Container(
+                              width: 120,
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 6),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Text(
+                                "Merge",
+                              ))),
+                      GestureDetector(
+                          onTap: purge,
+                          child: Container(
+                              width: 120,
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 6),
+                              decoration: BoxDecoration(
+                                  color: Colors.amber[900],
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Text(
+                                "Purge",
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ))),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        });
   }
 
   logOut() async {
     Navigator.of(context).pop();
-    if (user.isAnonymous) {
-      await user.delete();
-    } else {
+    if (isLoggedin) {
       FirebaseAuth.instance.signOut();
       GoogleSignIn().signOut();
+    } else {
+      Navigator.of(context).pop();
     }
   }
 
   noteHandler(int index) {
+    print(index);
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -214,6 +413,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   milliSeconds: 600),
               box.put('notes', content)
             }
+          else
+            {box.put('notes', content)}
         });
   }
 
@@ -233,14 +434,16 @@ class _MyHomePageState extends State<MyHomePage> {
         // });
         return Future.value(true);
       },
-      child: StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.userChanges(),
+      child: StreamBuilder<Object?>(
+          stream: isLoggedin ? FirebaseAuth.instance.userChanges() : null,
           builder: (context, snapshot) {
-            if (snapshot.data != user) {
-              // print("no change");
-              // setState(() {
-              user = snapshot.data as User;
-              // });
+            if (isLoggedin) {
+              if (snapshot.data != user) {
+                // print("no change");
+                // setState(() {
+                user = snapshot.data as User;
+                // });
+              }
             }
             // print(snapshot.data);
             // print(user);
@@ -254,6 +457,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 backgroundColor: Color.fromARGB(255, 31, 31, 31),
                 child: DrawerContent(
                   user: user,
+                  isLoggedIn: isLoggedin,
                   logout: () => logOut,
                   // localUser: userController,
                 ),
@@ -311,24 +515,33 @@ class _MyHomePageState extends State<MyHomePage> {
                                 // var listtobedel = toBedel.reversed;
 
                                 toBedel = toBedel.reversed.toList();
-                                final docUser = FirebaseFirestore.instance
-                                    .collection("notes")
-                                    .doc(user.uid);
-                                await docUser.get().then((value) async {
-                                  if (value.exists) {
-                                    for (var index in toBedel) {
-                                      final json = {
-                                        '${index}': FieldValue.delete()
-                                      };
-                                      docUser.update(json);
+                                if (isLoggedin) {
+                                  final docUser = FirebaseFirestore.instance
+                                      .collection("notes")
+                                      .doc(user.uid);
+                                  await docUser.get().then((value) async {
+                                    if (value.exists) {
+                                      for (var index in toBedel) {
+                                        // print(fetched.indexOf(content[index]));
+                                        var key = notesMap.keys.firstWhere(
+                                            (k) =>
+                                                notesMap[k] ==
+                                                "${content[index]}",
+                                            orElse: () => "null");
+                                        print(key);
+                                        final json = {
+                                          '${key}': FieldValue.delete()
+                                        };
+                                        docUser.update(json);
+                                      }
+                                      //   final json = {'${index}': data};
+                                      //   if (value.exists) {
+                                      //     docUser.update(json);
+                                      //   } else {
+                                      //     await docUser.set(json);
                                     }
-                                    //   final json = {'${index}': data};
-                                    //   if (value.exists) {
-                                    //     docUser.update(json);
-                                    //   } else {
-                                    //     await docUser.set(json);
-                                  }
-                                });
+                                  });
+                                }
                                 for (var index in toBedel) {
                                   // print(index);
                                   setState(() {
@@ -349,28 +562,52 @@ class _MyHomePageState extends State<MyHomePage> {
                               icon: Icon(Icons.delete)),
                         ]
                       : [
+                          IconButton(
+                            onPressed: isDifferent ? mergeorpurge : () {},
+                            icon: Icon(
+                              Icons.warning_amber_rounded,
+                              size: 30,
+                              color: isDifferent
+                                  ? Colors.amber[900]
+                                  : Colors.transparent,
+                            ),
+                          ),
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             child: Container(
                               padding: EdgeInsets.all(10),
                               child: GestureDetector(
                                 onTap: () {
-                                  openDialog();
+                                  // openDialog();
                                   // FirebaseAuth.instance.signOut();
                                   // GoogleSignIn().signOut();
                                 },
                                 child: CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: Colors.black,
-                                  backgroundImage: (user.photoURL != null)
-                                      ?
-                                      //  ?
-                                      NetworkImage('${user.photoURL}')
-                                          as ImageProvider
-                                      // AssetImage('assets/icon/ic_round.png')
-                                      : const AssetImage(
-                                          'assets/icon/ic_round.png'),
-                                ),
+                                    radius: 16,
+                                    backgroundColor: user.photoURL != null
+                                        ? Colors.transparent
+                                        : Colors.grey[600],
+                                    // backgroundColor: Colors.black,
+                                    // backgroundImage: (user.photoURL != null)
+                                    //     ?
+                                    //     //  ?
+                                    //     NetworkImage('${user.photoURL}')
+                                    //         as ImageProvider
+                                    //     // AssetImage('assets/icon/ic_round.png')
+                                    //     : null,
+                                    child: user.photoURL != null
+                                        ? ClipOval(
+                                            // borderRadius: BorderRadius.circular(25),
+                                            child: Image.network(
+                                                "${user.photoURL}"))
+                                        // child: Image.file(_image!))
+                                        : Icon(
+                                            CupertinoIcons.person,
+                                            color: Colors.white,
+                                          )
+                                    // : const AssetImage(
+                                    //     'assets/icon/ic_round.png'),
+                                    ),
                               ),
                             ),
                           ),
@@ -632,10 +869,16 @@ class DrawerContent extends StatelessWidget {
   var user;
 
   Function logout;
+
+  bool isLoggedIn;
   // Function logout()
   // UserController localUser;
 
-  DrawerContent({super.key, required this.user, required this.logout});
+  DrawerContent(
+      {super.key,
+      required this.user,
+      required this.logout,
+      required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -728,23 +971,23 @@ class DrawerContent extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontSize: 17),
             ),
           ),
-          ListTile(
-            // onTap: () {
-            //   Navigator.push(context, MaterialPageRoute(builder: (context) {
-            //     return SettingsPage();
-            //   }));
-            // },
-            enableFeedback: true,
-            leading: Icon(
-              Icons.fingerprint,
-              color: Colors.white,
-              size: 20,
-            ),
-            title: Text(
-              "Password and security",
-              style: TextStyle(color: Colors.white, fontSize: 17),
-            ),
-          ),
+          // ListTile(
+          //   // onTap: () {
+          //   //   Navigator.push(context, MaterialPageRoute(builder: (context) {
+          //   //     return SettingsPage();
+          //   //   }));
+          //   // },
+          //   enableFeedback: true,
+          //   leading: Icon(
+          //     Icons.fingerprint,
+          //     color: Colors.white,
+          //     size: 20,
+          //   ),
+          //   title: Text(
+          //     "Password and security",
+          //     style: TextStyle(color: Colors.white, fontSize: 17),
+          //   ),
+          // ),
           // ListTile(
           //   onTap: () {
           //     Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -763,7 +1006,19 @@ class DrawerContent extends StatelessWidget {
           // ),
           // logout
           GestureDetector(
-            onTap: logout(),
+            onTap: isLoggedIn
+                ? logout()
+                : () {
+                    Navigator.of(context).pop();
+                    // Navigator.of(context).pop();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return SignInOrUpPage(
+                        isSkippable: false,
+                        backPress: 1,
+                      );
+                    }));
+                  },
             child: ListTile(
               leading: Icon(
                 Icons.logout,
@@ -771,7 +1026,7 @@ class DrawerContent extends StatelessWidget {
                 size: 20,
               ),
               title: Text(
-                "log out",
+                isLoggedIn ? "log out" : "log in / create account",
                 style: TextStyle(color: Colors.white, fontSize: 17),
               ),
             ),

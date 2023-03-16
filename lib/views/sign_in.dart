@@ -1,7 +1,7 @@
 import 'package:BuzzNote/utilites/myButton.dart';
 import 'package:BuzzNote/utilites/mytextfield.dart';
 import 'package:BuzzNote/utilites/skipButton.dart';
-import 'package:BuzzNote/views/homepage copy.dart';
+import 'package:BuzzNote/views/homepage.dart';
 // import 'package:BuzzNote/views/homepagelocal.dart';
 import 'package:BuzzNote/views/sign_up.dart';
 import 'package:email_validator/email_validator.dart';
@@ -17,7 +17,13 @@ class SignIn extends StatefulWidget {
   final Function()? onTap;
   bool isSkippable;
 
-  SignIn({super.key, required this.onTap, this.isSkippable = true});
+  int backPress;
+
+  SignIn(
+      {super.key,
+      required this.onTap,
+      this.isSkippable = true,
+      this.backPress = 0});
 
   @override
   State<SignIn> createState() => _SignInState();
@@ -79,7 +85,9 @@ class _SignInState extends State<SignIn> {
                 password: passwordController.text.trim())
             .then((value) => null);
         if (!isSkippable) {
-          Navigator.pop(context);
+          for (var i = 0; i < widget.backPress; i++) {
+            Navigator.pop(context);
+          }
           // Navigator.pop(context);
         }
       } on FirebaseAuthException catch (e) {
@@ -114,9 +122,10 @@ class _SignInState extends State<SignIn> {
     }
     Navigator.pop(context);
     if (!isSkippable) {
-      Navigator.pop(context);
+      for (var i = 0; i < widget.backPress; i++) {
+        Navigator.pop(context);
+      }
       // Navigator.pop(context);
-      // Navigator.popUntil(context, ModalRoute.withName('/screen1'));
     }
   }
 

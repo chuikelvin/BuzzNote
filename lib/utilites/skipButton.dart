@@ -107,8 +107,8 @@ class _SkipButtonState extends State<SkipButton> {
                                     hintText: "Enter username",
                                     // hintStyle: TextStyle(color: Colors.white70),
                                     enabledBorder: OutlineInputBorder(
-                                        // borderSide:
-                                        // BorderSide(color: Colors.white70),
+                                        borderSide:
+                                            BorderSide(color: borderColor),
                                         borderRadius:
                                             BorderRadius.circular(18)),
                                     // border: InputBorder.none,
